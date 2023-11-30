@@ -6,6 +6,7 @@ import 'package:gamesheet/db/round.dart';
 import 'package:gamesheet/provider/game_provider.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/message.dart';
+import 'package:gamesheet/widgets/score_keeper.dart';
 
 class GameScreen extends StatelessWidget {
   final Game game;
@@ -47,77 +48,59 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   @override
   Widget build(BuildContext context) {
-    return NestedScrollView(
-      headerSliverBuilder: (context, isScrolled) {
-        return <Widget>[
-          SliverOverlapAbsorber(
-            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            sliver: SliverAppBar(
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              title: Text(widget.game.name),
-              elevation: 1,
-              scrolledUnderElevation: 1,
-              shadowColor: Theme.of(context).shadowColor,
-              expandedHeight: 200,
-              pinned: true,
-              floating: false,
-              bottom: TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                tabs: List.generate(
-                  numRounds,
-                  (index) => Tab(
-                    child: Text('Round ${numRounds - index - 1}'),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ];
-      },
-      body: TabBarView(
-        controller: _tabController,
-        children: List.generate(
-          numRounds,
-          (index) {
-            return SafeArea(
-              top: false,
-              bottom: false,
-              child: Builder(
-                builder: (context) {
-                  return CustomScrollView(
-                    key: PageStorageKey<int>(index),
-                    slivers: <Widget>[
-                      SliverOverlapInjector(
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                            context),
-                      ),
-                      SliverList.list(
-                        children: _players == null
-                            ? [ScoreboardMessage('Loading...')]
-                            : _players!.map((player) {
-                                return ScoreboardCard(
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      labelText: player.name,
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: <TextInputFormatter>[
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            );
-          },
-        ).toList(),
+    return ScoreKeeper(
+      controller: _tabController,
+      title: widget.game.name,
+      numTabs: numRounds,
+      headerBuilder: (context, index) => Tab(
+        child: Container(
+          constraints: BoxConstraints(minWidth: 32),
+          child: Center(child: Text('${numRounds - index - 1}')),
+        ),
       ),
+      pageBuilder: (context, round) {
+        return SliverList.list(
+          children: _players == null
+              ? [ScoreboardMessage('Loading...')]
+              : [
+                  ScoreboardCard(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    child: ListView.separated(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: _players!.length,
+                      itemBuilder: (context, index) {
+                        return Row(
+                          children: <Widget>[
+                            Center(
+                              child: Text(
+                                _players![index].name,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ),
+                            Spacer(),
+                            Container(
+                              width: 150,
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Score',
+                                ),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: <TextInputFormatter>[
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      separatorBuilder: (context, index) => Divider(),
+                    ),
+                  )
+                ],
+        );
+      },
     );
   }
 

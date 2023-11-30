@@ -54,7 +54,7 @@ class GameList extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         games[index].name,
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
                       Text(
                         games[index].type.label,

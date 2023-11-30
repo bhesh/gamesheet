@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class ScoreboardCard extends StatelessWidget {
   final String? title;
   final Widget? child;
+  final EdgeInsetsGeometry margin;
+  final CrossAxisAlignment crossAxisAlignment;
 
   const ScoreboardCard({
     super.key,
     this.title,
     this.child,
+    this.margin = const EdgeInsets.only(top: 8, left: 8, right: 8),
+    this.crossAxisAlignment = CrossAxisAlignment.stretch,
   });
 
   @override
@@ -30,7 +34,7 @@ class ScoreboardCard extends StatelessWidget {
     }
     children.add(
       Card(
-        margin: const EdgeInsets.only(top: 8, left: 8, right: 8),
+        margin: margin,
         child: Padding(
           padding: EdgeInsets.all(16),
           child: child,
@@ -38,7 +42,7 @@ class ScoreboardCard extends StatelessWidget {
       ),
     );
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: crossAxisAlignment,
       children: children,
     );
   }
