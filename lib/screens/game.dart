@@ -41,85 +41,84 @@ class _PlayerScreenState extends State<PlayerScreen>
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: numRounds, vsync: this);
     _fetchPlayers();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _players == null
-        ? ScoreboardMessage('Loading...')
-        : NestedScrollView(
-            headerSliverBuilder: (context, isScrolled) {
-              return <Widget>[
-                SliverOverlapAbsorber(
-                  handle:
-                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  sliver: SliverAppBar(
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                    title: Text(widget.game.name),
-                    elevation: 1,
-                    scrolledUnderElevation: 1,
-                    shadowColor: Theme.of(context).shadowColor,
-                    expandedHeight: 200,
-                    pinned: true,
-                    floating: false,
-                    bottom: TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      tabs: _players!
-                          .map((player) => Tab(child: Text(player.name)))
-                          .toList(),
-                    ),
+    return NestedScrollView(
+      headerSliverBuilder: (context, isScrolled) {
+        return <Widget>[
+          SliverOverlapAbsorber(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            sliver: SliverAppBar(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              title: Text(widget.game.name),
+              elevation: 1,
+              scrolledUnderElevation: 1,
+              shadowColor: Theme.of(context).shadowColor,
+              expandedHeight: 200,
+              pinned: true,
+              floating: false,
+              bottom: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabs: List.generate(
+                  numRounds,
+                  (index) => Tab(
+                    child: Text('Round ${numRounds - index - 1}'),
                   ),
                 ),
-              ];
-            },
-            body: TabBarView(
-              controller: _tabController,
-              children: _players!.map((player) {
-                return SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Builder(
-                    builder: (context) {
-                      return CustomScrollView(
-                        key: PageStorageKey<int>(player.id!),
-                        slivers: <Widget>[
-                          SliverOverlapInjector(
-                            handle:
-                                NestedScrollView.sliverOverlapAbsorberHandleFor(
-                                    context),
-                          ),
-                          SliverList.list(
-                            children: List.generate(
-                              numRounds,
-                              (int index) => Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: index == 12 ? 8 : 0,
-                                ),
-                                child: ScoreboardCard(
+              ),
+            ),
+          ),
+        ];
+      },
+      body: TabBarView(
+        controller: _tabController,
+        children: List.generate(
+          numRounds,
+          (index) {
+            return SafeArea(
+              top: false,
+              bottom: false,
+              child: Builder(
+                builder: (context) {
+                  return CustomScrollView(
+                    key: PageStorageKey<int>(index),
+                    slivers: <Widget>[
+                      SliverOverlapInjector(
+                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                            context),
+                      ),
+                      SliverList.list(
+                        children: _players == null
+                            ? [ScoreboardMessage('Loading...')]
+                            : _players!.map((player) {
+                                return ScoreboardCard(
                                   child: TextField(
                                     decoration: InputDecoration(
                                       border: OutlineInputBorder(),
-                                      labelText: 'Round ${numRounds - index - 1}',
+                                      labelText: player.name,
                                     ),
                                     keyboardType: TextInputType.number,
                                     inputFormatters: <TextInputFormatter>[
                                       FilteringTextInputFormatter.digitsOnly,
                                     ],
                                   ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          );
+                                );
+                              }).toList(),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
+        ).toList(),
+      ),
+    );
   }
 
   void _fetchPlayers() {
@@ -128,7 +127,6 @@ class _PlayerScreenState extends State<PlayerScreen>
         return await GameProvider.getPlayers(widget.game.id!);
       }).then(
         (players) => setState(() {
-          _tabController = TabController(length: players.length, vsync: this);
           _players = players;
         }),
       );
