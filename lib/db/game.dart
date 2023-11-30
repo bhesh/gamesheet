@@ -3,7 +3,8 @@ import 'package:material_symbols_icons/symbols.dart';
 
 enum GameType {
   train(1, 'Train', Symbols.casino),
-  ping(2, 'Ping', Symbols.playing_cards);
+  ping(2, 'Ping', Symbols.playing_cards),
+  wizard(3, 'Wizard', Symbols.settings_accessibility);
 
   final int id;
   final String label;

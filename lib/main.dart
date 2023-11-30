@@ -11,7 +11,7 @@ const double windowHeight = 800;
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   platformInit();
-  await AppDatabase.initialize();
+  await Provider.initialize();
   runApp(const MyApp());
 }
 

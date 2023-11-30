@@ -10,37 +10,74 @@ DatabaseFactory get databaseFactory => (Platform.isLinux || Platform.isWindows)
     ? databaseFactoryFfi
     : sqflite.databaseFactory;
 
-class AppDatabase {
-  static Database? _database;
+class Provider {
+  static Database? _settingsDatabase;
+  static Database? _gameDatabase;
 
   static Future initialize() async {
-    if (_database == null) {
-      sqfliteFfiInit();
-      await _initDatabase();
-    }
+    sqfliteFfiInit();
+    if (_settingsDatabase == null) await _initSettingsDatabase();
+    if (_gameDatabase == null) await _initGameDatabase();
   }
 
-  static Future<Database> get database async =>
-      _database == null ? await _initDatabase() : _database!;
+  static Future<Database> get settingsDatabase async =>
+      _settingsDatabase == null
+          ? await _initSettingsDatabase()
+          : _settingsDatabase!;
 
-  static Future<Database> _initDatabase() async {
+  static Future<Database> _initSettingsDatabase() async {
     final Directory directory = await getApplicationSupportDirectory();
-    final dbPath = join(directory.path, 'database.db');
-    print('Database path: $dbPath');
-    _database = await databaseFactory.openDatabase(
+    final dbPath = join(directory.path, 'settings.db');
+    print('Settings database path: $dbPath');
+    _settingsDatabase = await databaseFactory.openDatabase(
       dbPath,
       options: OpenDatabaseOptions(
-        onCreate: (db, version) async => await _createDatabase(db),
+        onCreate: (db, version) async => await createSettingsDatabase(db),
         onUpgrade: (db, oldVersion, newVersion) async {
-          if (oldVersion < dbVersion) await _createDatabase(db);
+          if (oldVersion < dbVersion) await createSettingsDatabase(db);
         },
         version: dbVersion,
       ),
     );
-    return _database!;
+    return _settingsDatabase!;
   }
 
-  static Future _createDatabase(Database db) async {
+  static Future createSettingsDatabase(Database db) async {
+    var batch = db.batch();
+    batch.execute('DROP TABLE IF EXISTS settings');
+    batch.execute(
+      '''
+      CREATE TABLE settings (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL,
+          value INTEGER NOT NULL
+      )
+      ''',
+    );
+    await batch.commit(noResult: true);
+  }
+
+  static Future<Database> get gameDatabase async =>
+      _gameDatabase == null ? await _initGameDatabase() : _gameDatabase!;
+
+  static Future<Database> _initGameDatabase() async {
+    final Directory directory = await getApplicationSupportDirectory();
+    final dbPath = join(directory.path, 'database.db');
+    print('Game database path: $dbPath');
+    _gameDatabase = await databaseFactory.openDatabase(
+      dbPath,
+      options: OpenDatabaseOptions(
+        onCreate: (db, version) async => await createGameDatabase(db),
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < dbVersion) await createGameDatabase(db);
+        },
+        version: dbVersion,
+      ),
+    );
+    return _gameDatabase!;
+  }
+
+  static Future createGameDatabase(Database db) async {
     var batch = db.batch();
     batch.execute('DROP TABLE IF EXISTS games');
     batch.execute(

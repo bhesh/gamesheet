@@ -19,7 +19,7 @@ class GameList extends StatelessWidget {
   Widget build(BuildContext context) {
     return games.isNotEmpty
         ? _buildListView(context)
-        : ScoreboardMessage('No games');
+        : GamesheetMessage('No games');
   }
 
   Widget _buildListView(BuildContext context) {
@@ -35,12 +35,12 @@ class GameList extends StatelessWidget {
           onDismissed: (direction) => onDelete(context, index),
           confirmDismiss: (direction) => _confirmDismiss(context),
           background: Padding(
-            padding: EdgeInsets.only(top: 8),
+            padding: EdgeInsets.only(bottom: 8),
             child: Container(color: Theme.of(context).colorScheme.error),
           ),
           child: GestureDetector(
             onTap: () => onTap(context, index),
-            child: ScoreboardCard(
+            child: GamesheetCard(
               child: Row(
                 children: <Widget>[
                   Padding(
@@ -58,9 +58,11 @@ class GameList extends StatelessWidget {
                       ),
                       Text(
                         games[index].type.label,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              color: Theme.of(context).colorScheme.onBackground,
-                            ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6)),
                       ),
                     ],
                   ),

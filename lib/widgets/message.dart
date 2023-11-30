@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class ScoreboardMessage extends StatelessWidget {
+class GamesheetMessage extends StatelessWidget {
   final String message;
 
-  const ScoreboardMessage(this.message, {super.key});
+  const GamesheetMessage(this.message, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +11,11 @@ class ScoreboardMessage extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Text(message),
+        child: Text(
+          message,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6)),
+        ),
       ),
     );
   }

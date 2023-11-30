@@ -32,18 +32,20 @@ class PlayerTextFields extends StatelessWidget {
             ? _buildListView(context)
             : Text(
                 errorText == null ? 'Add players' : errorText!,
-                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: errorText == null
                           ? Theme.of(context).colorScheme.onSurface
                           : Theme.of(context).colorScheme.error,
                     ),
               ),
         Padding(padding: const EdgeInsets.symmetric(vertical: 8)),
-        TextButton(
+        IconButton(
+          icon: Icon(Symbols.person_add),
+          color: Theme.of(context).colorScheme.primary,
+          tooltip: 'Add Player Field',
           onPressed: onAdd == null || controllers.length >= maxNumPlayers
               ? null
               : () => onAdd!(context),
-          child: Icon(Symbols.add_circle_outline),
         ),
       ],
     );
@@ -60,12 +62,16 @@ class PlayerTextFields extends StatelessWidget {
         return TextField(
           controller: controllers[index],
           decoration: InputDecoration(
+            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+            prefixIcon: Icon(Symbols.person),
             border: OutlineInputBorder(),
             labelText: labelText,
             helperText: helperText,
             errorText: errorText,
             suffixIcon: IconButton(
               icon: Icon(Symbols.delete),
+              color: Theme.of(context).colorScheme.error,
+              tooltip: 'Remove Player Field',
               onPressed: () =>
                   onDelete == null ? {} : onDelete!(context, index),
             ),

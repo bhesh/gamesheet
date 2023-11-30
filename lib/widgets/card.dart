@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 
-class ScoreboardCard extends StatelessWidget {
+class GamesheetCard extends StatelessWidget {
   final String? title;
   final Widget? child;
   final EdgeInsetsGeometry margin;
   final CrossAxisAlignment crossAxisAlignment;
+  final Color? color;
 
-  const ScoreboardCard({
+  const GamesheetCard({
     super.key,
     this.title,
     this.child,
-    this.margin = const EdgeInsets.only(top: 8, left: 8, right: 8),
+    this.margin = const EdgeInsets.only(bottom: 8, left: 8, right: 8),
     this.crossAxisAlignment = CrossAxisAlignment.stretch,
+    this.color,
   });
 
   @override
@@ -21,12 +23,13 @@ class ScoreboardCard extends StatelessWidget {
       children.add(
         Center(
           child: Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
               title!,
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
             ),
           ),
         ),
@@ -35,6 +38,7 @@ class ScoreboardCard extends StatelessWidget {
     children.add(
       Card(
         margin: margin,
+        color: color,
         child: Padding(
           padding: EdgeInsets.all(16),
           child: child,

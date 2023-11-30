@@ -5,13 +5,13 @@ import 'package:gamesheet/db/round.dart';
 
 class GameProvider {
   static Future<List<Game>> getGames() async {
-    var database = await AppDatabase.database;
+    var database = await Provider.gameDatabase;
     var list = await database.query('games');
     return list.map((map) => Game.fromMap(map)).toList();
   }
 
   static Future<List<Player>> getPlayers(int gameId) async {
-    var database = await AppDatabase.database;
+    var database = await Provider.gameDatabase;
     var list = await database.query(
       'players',
       where: 'gameId = ?',
@@ -21,7 +21,7 @@ class GameProvider {
   }
 
   static Future<List<Round>> getRound(int gameId, int round) async {
-    var database = await AppDatabase.database;
+    var database = await Provider.gameDatabase;
     var list = await database.query(
       'rounds',
       where: 'gameId = ? AND round = ?',
@@ -31,7 +31,7 @@ class GameProvider {
   }
 
   static Future<int> addGame(Game game, List<String> playerNames) async {
-    var database = await AppDatabase.database;
+    var database = await Provider.gameDatabase;
     int gameId = await database.insert('games', game.toMap());
     var batch = database.batch();
     playerNames.forEach(
@@ -45,7 +45,7 @@ class GameProvider {
   }
 
   static Future<int> removeGame(int gameId) async {
-    var database = await AppDatabase.database;
+    var database = await Provider.gameDatabase;
     await database.delete(
       'players',
       where: 'gameId = ?',

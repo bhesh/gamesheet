@@ -14,7 +14,7 @@ class ScoreKeeper extends StatelessWidget {
   final PageSliverBuilder pageBuilder;
   final TabController? controller;
 
-  const ScoreKeeper({
+  ScoreKeeper({
     super.key,
     required this.title,
     required this.numTabs,
@@ -36,6 +36,7 @@ class ScoreKeeper extends StatelessWidget {
               elevation: 1,
               scrolledUnderElevation: 1,
               shadowColor: Theme.of(context).colorScheme.shadow,
+              surfaceTintColor: Theme.of(context).colorScheme.shadow,
               expandedHeight: 200,
               pinned: true,
               floating: false,
@@ -51,30 +52,35 @@ class ScoreKeeper extends StatelessWidget {
           ),
         ];
       },
-      body: TabBarView(
-        controller: controller,
-        children: List.generate(
-          numTabs,
-          (index) {
-            return SafeArea(
-              top: false,
-              bottom: false,
-              child: Builder(
-                builder: (context) {
-                  return CustomScrollView(
-                    key: PageStorageKey<int>(index),
-                    slivers: <Widget>[
-                      SliverOverlapInjector(
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                            context),
-                      ),
-                      pageBuilder(context, index),
-                    ],
-                  );
-                },
-              ),
-            );
-          },
+      body: Padding(
+        padding: EdgeInsets.only(top: 8),
+        child: TabBarView(
+          controller: controller,
+          children: List.generate(
+            numTabs,
+            (index) {
+              return SafeArea(
+                top: false,
+                bottom: false,
+                child: Builder(
+                  builder: (context) {
+                    return CustomScrollView(
+                      controller: ScrollController(), // throws error otherwise
+                      key: PageStorageKey<int>(index),
+                      slivers: <Widget>[
+                        SliverOverlapInjector(
+                          handle:
+                              NestedScrollView.sliverOverlapAbsorberHandleFor(
+                                  context),
+                        ),
+                        pageBuilder(context, index),
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
