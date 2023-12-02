@@ -31,12 +31,7 @@ class ScoreKeeper extends StatelessWidget {
           SliverOverlapAbsorber(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
             sliver: SliverAppBar(
-              backgroundColor: Theme.of(context).colorScheme.surface,
               title: Text(title),
-              elevation: 1,
-              scrolledUnderElevation: 1,
-              shadowColor: Theme.of(context).colorScheme.shadow,
-              surfaceTintColor: Theme.of(context).colorScheme.shadow,
               expandedHeight: 200,
               pinned: true,
               floating: false,

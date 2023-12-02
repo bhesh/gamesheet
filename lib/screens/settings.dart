@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/provider/database.dart';
+import 'package:gamesheet/db/color.dart';
 import 'package:gamesheet/widgets/loader.dart';
 import 'package:gamesheet/widgets/settings.dart';
 
@@ -11,16 +12,12 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings'),
-        elevation: 1,
-        scrolledUnderElevation: 1,
-        shadowColor: Theme.of(context).colorScheme.shadow,
       ),
       body: ListView(
         children: <Widget>[
@@ -28,13 +25,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             header: 'Look and feel',
             children: <Widget>[
               SettingsField(
-                title: 'Dark Theme',
-                description: 'Uses the dark theme',
-                suffixWidget: Switch(
-                  value: _isDarkMode,
-                  onChanged: (_) => _toggleDarkMode(),
-                ),
-                onTap: _toggleDarkMode,
+                title: 'Theme',
+                description: '<current theme>',
+                onTap: _changeTheme,
               ),
             ],
           ),
@@ -90,9 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _toggleDarkMode() {
-    setState(() => _isDarkMode = !_isDarkMode);
-  }
+  void _changeTheme() {}
 
   Future<bool> _confirm(BuildContext context, String message) async {
     return await showDialog(

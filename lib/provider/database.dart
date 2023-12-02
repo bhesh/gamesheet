@@ -49,7 +49,6 @@ class Provider {
       '''
       CREATE TABLE settings (
           id INTEGER PRIMARY KEY,
-          name TEXT NOT NULL,
           value INTEGER NOT NULL
       )
       ''',
@@ -85,7 +84,8 @@ class Provider {
       CREATE TABLE games (
           id INTEGER PRIMARY KEY,
           name TEXT NOT NULL,
-          type INTEGER NOT NULL
+          type INTEGER NOT NULL,
+          created INTEGER NOT NULL
       )
       ''',
     );
@@ -94,8 +94,9 @@ class Provider {
       '''
       CREATE TABLE players (
           id INTEGER PRIMARY KEY,
-          gameId INTEGER NOT NULL,
-          name TEXT NOT NULL
+          name TEXT NOT NULL,
+          color INTEGER NOT NULL,
+          gameId INTEGER NOT NULL
       )
       ''',
     );

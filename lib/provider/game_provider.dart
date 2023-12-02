@@ -1,4 +1,5 @@
 import 'package:gamesheet/provider/database.dart';
+import 'package:gamesheet/db/color.dart';
 import 'package:gamesheet/db/game.dart';
 import 'package:gamesheet/db/player.dart';
 import 'package:gamesheet/db/round.dart';
@@ -30,16 +31,24 @@ class GameProvider {
     return list.map((map) => Round.fromMap(map)).toList();
   }
 
-  static Future<int> addGame(Game game, List<String> playerNames) async {
+  static Future<int> addGame(
+    Game game,
+    List<(String, GameColor)> players,
+  ) async {
     var database = await Provider.gameDatabase;
     int gameId = await database.insert('games', game.toMap());
     var batch = database.batch();
-    playerNames.forEach(
-      (name) => batch.insert(
+    players.forEach((item) {
+      var (name, color) = item;
+      batch.insert(
         'players',
-        Player(name: name, gameId: gameId).toMap(),
-      ),
-    );
+        Player(
+          name: name,
+          color: color,
+          gameId: gameId,
+        ).toMap(),
+      );
+    });
     await batch.commit(noResult: true);
     return gameId;
   }

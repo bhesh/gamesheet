@@ -14,7 +14,8 @@ class GamesheetMessage extends StatelessWidget {
         child: Text(
           message,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6)),
+              color:
+                  Theme.of(context).colorScheme.onBackground.withOpacity(0.6)),
         ),
       ),
     );

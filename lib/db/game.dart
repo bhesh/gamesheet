@@ -21,21 +21,25 @@ class Game {
   final int? id;
   final String name;
   final GameType type;
+  final DateTime created;
 
   const Game({
     required this.name,
     required this.type,
+    required this.created,
   }) : this.id = null;
 
   Game.fromMap(Map<String, dynamic> map)
       : this.id = map['id'],
         this.name = map['name'],
-        this.type = GameType.fromId(map['type']);
+        this.type = GameType.fromId(map['type']),
+        this.created = DateTime.fromMillisecondsSinceEpoch(map['created']);
 
   Map<String, dynamic> toMap() {
     var map = {
       'name': name,
       'type': type.id,
+      'created': created.millisecondsSinceEpoch,
     };
     if (id != null) map['id'] = id!;
     return map;

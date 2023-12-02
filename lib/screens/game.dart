@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
 import 'package:flutter/services.dart';
+import 'package:gamesheet/db/color.dart';
 import 'package:gamesheet/db/game.dart';
 import 'package:gamesheet/db/player.dart';
 import 'package:gamesheet/db/round.dart';
@@ -23,7 +24,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   late final List<String> _roundLabels;
   late final TabController _tabController;
   late final List<Player>? _players;
-  late final List<AvatarColors>? _colors;
 
   bool initialized = false;
   List<List<Round>>? _rounds;
@@ -54,7 +54,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       headerBuilder: (context, index) => Tab(
         child: Container(
           constraints: BoxConstraints(minWidth: 32),
-          child: Center(child: Text(_roundLabels[index])),
+          child: Center(
+            child: Text(
+              _roundLabels[index],
+              style: Theme.of(context).primaryTextTheme.labelMedium,
+            ),
+          ),
         ),
       ),
       pageBuilder: (context, page) => _buildPage(context, page),
@@ -68,7 +73,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         List<Widget> children = [
           GamesheetAvatar(
             name: _players![index].name,
-            color: _colors == null ? null : _colors![index],
+            color: _players![index].color,
           ),
           Padding(padding: EdgeInsets.only(right: 16)),
           Container(
@@ -154,7 +159,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           }
           _tabController =
               TabController(length: _roundLabels.length, vsync: this);
-          _colors = List.generate(players.length, (_) => AvatarColors.random);
           _players = players;
           initialized = true;
         }),

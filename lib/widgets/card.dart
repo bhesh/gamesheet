@@ -6,6 +6,7 @@ class GamesheetCard extends StatelessWidget {
   final EdgeInsetsGeometry margin;
   final CrossAxisAlignment crossAxisAlignment;
   final Color? color;
+  final double elevation;
 
   const GamesheetCard({
     super.key,
@@ -14,6 +15,7 @@ class GamesheetCard extends StatelessWidget {
     this.margin = const EdgeInsets.only(bottom: 8, left: 8, right: 8),
     this.crossAxisAlignment = CrossAxisAlignment.stretch,
     this.color,
+    this.elevation = 0,
   });
 
   @override
@@ -26,28 +28,28 @@ class GamesheetCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
               title!,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
             ),
           ),
         ),
       );
     }
     children.add(
-      Card(
-        margin: margin,
-        color: color,
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: child,
-        ),
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: child,
       ),
     );
-    return Column(
-      crossAxisAlignment: crossAxisAlignment,
-      children: children,
+    return Card(
+      margin: margin,
+      color: color,
+      elevation: elevation,
+      child: Column(
+        crossAxisAlignment: crossAxisAlignment,
+        children: children,
+      ),
     );
   }
 }

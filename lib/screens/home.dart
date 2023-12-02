@@ -62,9 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
             }).toList(),
           ),
         ],
-        elevation: 1,
-        scrolledUnderElevation: 1,
-        shadowColor: Theme.of(context).colorScheme.shadow,
       ),
       body: _games == null
           ? SpinKitRing(

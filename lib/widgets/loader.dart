@@ -7,7 +7,7 @@ Future loaderDialog(BuildContext context, Future Function() task) async {
     context: context,
     builder: (_) {
       return Dialog(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        //backgroundColor: Theme.of(context).colorScheme.surface,
         child: Container(
           width: 100,
           height: 100,

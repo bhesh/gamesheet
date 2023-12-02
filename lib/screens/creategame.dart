@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:gamesheet/db/color.dart';
 import 'package:gamesheet/db/game.dart';
 import 'package:gamesheet/provider/game_provider.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/loader.dart';
 import 'package:gamesheet/widgets/player_text_fields.dart';
+import 'package:gamesheet/widgets/popup_selector.dart';
+import 'package:gamesheet/widgets/rounded_text_field.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 const int maxNumPlayers = 16;
@@ -17,9 +20,7 @@ class CreateGameScreen extends StatefulWidget {
 
 class _CreateGameScreenState extends State<CreateGameScreen> {
   final TextEditingController _nameController = TextEditingController();
-  final List<TextEditingController> _playerControllers = [
-    TextEditingController()
-  ];
+  late final List<PlayerController> _playerControllers;
 
   GameType _selectedGameType = GameType.train;
   String? _nameError;
@@ -34,7 +35,14 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _playerControllers = [PlayerController.random()];
+  }
+
+  @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: Text('Create Game'),
@@ -45,10 +53,6 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
             onPressed: () => _createGame(context),
           ),
         ],
-        elevation: 1,
-        scrolledUnderElevation: 1,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        shadowColor: Theme.of(context).colorScheme.shadow,
       ),
       body: Padding(
         padding: EdgeInsets.only(top: 8),
@@ -57,43 +61,62 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
           shrinkWrap: true,
           children: <Widget>[
             GamesheetCard(
-              child: TextField(
+              child: RoundedTextField(
                 controller: _nameController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Game Name',
-                  helperText: 'Enter a name for the game',
-                  errorText: _nameError,
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-                ),
-                maxLength: 20,
+                icon: Icon(Symbols.videogame_asset),
+                hintText: 'Game Name',
+                errorText: _nameError,
               ),
             ),
             GamesheetCard(
               title: 'Select game type',
-              child: DropdownMenu<GameType>(
-                leadingIcon: Icon(_selectedGameType.icon),
-                inputDecorationTheme: InputDecorationTheme(
-                  border: OutlineInputBorder(),
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+              child: PopupSelector(
+                initialSelection: Row(
+                  children: <Widget>[
+                    Icon(_selectedGameType.icon),
+                    Padding(
+                      padding: EdgeInsets.only(left: 16),
+                      child: Text(
+                        _selectedGameType.label,
+                        style:
+                            Theme.of(context).inputDecorationTheme?.hintStyle,
+                      ),
+                    ),
+                  ],
                 ),
-                initialSelection: _selectedGameType,
-                onSelected: (GameType? type) {
-                  setState(() {
-                    _selectedGameType = type!;
-                  });
-                },
-                dropdownMenuEntries: GameType.values
-                    .map<DropdownMenuEntry<GameType>>((GameType type) {
-                  return DropdownMenuEntry<GameType>(
-                    leadingIcon: Icon(type.icon),
-                    value: type,
-                    label: type.label,
+                selectionPadding:
+                    EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                itemPadding: EdgeInsets.symmetric(vertical: 5),
+                itemCount: GameType.values.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(29),
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        Icon(GameType.values[index].icon, size: 48),
+                        Padding(
+                          padding: EdgeInsets.only(left: 16),
+                          child: Text(
+                            GameType.values[index].label,
+                            style: Theme.of(context)
+                                .inputDecorationTheme
+                                ?.hintStyle,
+                          ),
+                        ),
+                      ],
+                    ),
                   );
-                }).toList(),
-                expandedInsets: EdgeInsets.all(0),
+                },
+                onSelected: (index) => setState(
+                  () => _selectedGameType = GameType.values[index],
+                ),
               ),
             ),
             GamesheetCard(
@@ -102,13 +125,13 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                 controllers: _playerControllers,
                 maxNumPlayers: maxNumPlayers,
                 maxNameLength: 20,
-                labelText: 'Player Name',
-                helperText: 'Enter a name for the player',
+                hintText: 'Player Name',
                 errorText: _playerError,
                 onAdd: (context) => setState(() {
                   _playerError = null;
-                  _playerControllers.add(TextEditingController());
+                  _playerControllers.add(PlayerController.random());
                 }),
+                onAvatar: (context, index) => _colorChooser(context, index),
                 onDelete: (context, index) => setState(() {
                   _playerControllers.removeAt(index).dispose();
                 }),
@@ -124,9 +147,12 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     var finalizedName = _nameController.text.trim();
     var finalizedPlayers = _playerControllers
         .take(maxNumPlayers)
-        .map((player) => player.text.trim())
+        .map((player) => (player.text.trim(), player.color))
         .toList();
-    finalizedPlayers.removeWhere((name) => name.isEmpty);
+    finalizedPlayers.removeWhere((item) {
+      var (name, _) = item;
+      return name.isEmpty;
+    });
     if (finalizedName.isEmpty || finalizedPlayers.isEmpty) {
       setState(() {
         _nameError = finalizedName.isEmpty ? 'Enter a name for the game' : null;
@@ -140,10 +166,51 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
       });
       loaderDialog(context, () async {
         await GameProvider.addGame(
-          Game(name: finalizedName, type: _selectedGameType),
+          Game(
+            name: finalizedName,
+            type: _selectedGameType,
+            created: DateTime.now(),
+          ),
           finalizedPlayers,
         );
       }).then((_) => Navigator.of(context).pop(true));
     }
+  }
+
+  void _colorChooser(BuildContext context, int playerIndex) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 75,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+            ),
+            itemCount: GameColor.numColors,
+            itemBuilder: (context, colorIndex) {
+              return GestureDetector(
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: GameColor.values[colorIndex].background,
+                    borderRadius: BorderRadius.circular(37.5),
+                  ),
+                ),
+                onTap: () {
+                  setState(() => _playerControllers[playerIndex].setColor(
+                        GameColor.values[colorIndex],
+                      ));
+                  Navigator.of(context).pop(true);
+                },
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }

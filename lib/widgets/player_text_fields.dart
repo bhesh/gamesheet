@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:gamesheet/db/color.dart';
 import 'package:gamesheet/widgets/card.dart';
+import 'package:gamesheet/widgets/rounded_text_field.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class PlayerTextFields extends StatelessWidget {
-  final List<TextEditingController> controllers;
+  final List<PlayerController> controllers;
   final int maxNumPlayers;
   final int maxNameLength;
-  final String? labelText;
-  final String? helperText;
+  final String? hintText;
   final String? errorText;
   final void Function(BuildContext)? onAdd;
+  final void Function(BuildContext, int)? onAvatar;
   final void Function(BuildContext, int)? onDelete;
 
   const PlayerTextFields({
@@ -17,10 +19,10 @@ class PlayerTextFields extends StatelessWidget {
     required this.controllers,
     this.maxNumPlayers = 16,
     this.maxNameLength = 30,
-    this.labelText,
-    this.helperText,
+    this.hintText,
     this.errorText,
     this.onAdd,
+    this.onAvatar,
     this.onDelete,
   });
 
@@ -59,28 +61,59 @@ class PlayerTextFields extends StatelessWidget {
           ? maxNumPlayers
           : controllers.length,
       itemBuilder: (context, index) {
-        return TextField(
-          controller: controllers[index],
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-            prefixIcon: Icon(Symbols.person),
-            border: OutlineInputBorder(),
-            labelText: labelText,
-            helperText: helperText,
-            errorText: errorText,
-            suffixIcon: IconButton(
-              icon: Icon(Symbols.delete),
-              color: Theme.of(context).colorScheme.error,
-              tooltip: 'Remove Player Field',
-              onPressed: () =>
-                  onDelete == null ? {} : onDelete!(context, index),
+        return RoundedTextField(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          controller: controllers[index].textController,
+          icon: GestureDetector(
+            child: CircleAvatar(
+              backgroundColor: controllers[index].color.background,
+              radius: 15,
             ),
+            onTap: () => onAvatar == null ? {} : onAvatar!(context, index),
           ),
-          maxLength: maxNameLength,
+          hintText: hintText,
+          errorText: errorText,
+          suffixIcon: IconButton(
+            icon: Icon(Symbols.delete),
+            color: Theme.of(context).colorScheme.error,
+            tooltip: 'Remove Player Field',
+            onPressed: () => onDelete == null ? {} : onDelete!(context, index),
+          ),
         );
       },
       separatorBuilder: (context, index) =>
           Padding(padding: const EdgeInsets.symmetric(vertical: 8)),
     );
+  }
+}
+
+class PlayerController {
+  final TextEditingController textController;
+  GameColor color;
+
+  PlayerController()
+      : this.textController = TextEditingController(),
+        this.color = GameColor.red;
+
+  PlayerController.withColor(this.color)
+      : this.textController = TextEditingController();
+
+  PlayerController.random()
+      : this.textController = TextEditingController(),
+        this.color = GameColor.random;
+
+  @override
+  void dispose() {
+    textController.dispose();
+  }
+
+  String get text => textController.text;
+
+  void setColor(GameColor newColor) {
+    color = newColor;
+  }
+
+  void randomColor() {
+    color = GameColor.random;
   }
 }
