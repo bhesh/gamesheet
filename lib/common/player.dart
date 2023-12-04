@@ -1,9 +1,9 @@
-import 'package:gamesheet/db/color.dart';
+import './color.dart';
 
 class Player {
   final int? id;
   final String name;
-  final GameColor color;
+  final Palette color;
   final int gameId;
 
   const Player({
@@ -15,7 +15,7 @@ class Player {
   Player.fromMap(Map<String, dynamic> map)
       : this.id = map['id'],
         this.name = map['name'],
-        this.color = GameColor.fromId(map['color']),
+        this.color = Palette.fromId(map['color']),
         this.gameId = map['gameId'];
 
   Map<String, dynamic> toMap() {

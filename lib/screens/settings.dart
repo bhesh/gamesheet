@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:gamesheet/provider/database.dart';
-import 'package:gamesheet/db/color.dart';
+import 'package:gamesheet/common/color.dart';
+import 'package:gamesheet/common/settings.dart';
+import 'package:gamesheet/common/themes.dart';
+import 'package:gamesheet/db/database.dart';
+import 'package:gamesheet/db/settings_provider.dart';
 import 'package:gamesheet/widgets/loader.dart';
-import 'package:gamesheet/widgets/settings.dart';
+import 'package:provider/provider.dart';
+import './settings/settings.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -12,9 +16,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-
   @override
   Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeChanger>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings'),
@@ -26,23 +30,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: <Widget>[
               SettingsField(
                 title: 'Theme',
-                description: '<current theme>',
-                onTap: _changeTheme,
+                // Hana for my wife
+                description: theme.color == Palette.lightPink && theme.isDark
+                    ? 'Hana'
+                    : (theme.isDark ? 'Dark ' : 'Light ') + theme.color.label,
+                onTap: () => _changeTheme(theme),
               ),
             ],
           ),
-          Divider(),
-          SettingsSection(
+          const Divider(),
+          const SettingsSection(
             header: 'General',
             children: <Widget>[
-              SettingsField(
+              const SettingsField(
                 title: 'About',
                 description: 'Score tracker for a variety of games',
-                onTap: () {},
               ),
             ],
           ),
-          Divider(),
+          const Divider(),
           SettingsSection(
             header: 'Danger',
             headerStyle: Theme.of(context)
@@ -83,7 +89,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _changeTheme() {}
+  void _changeTheme(ThemeChanger theme) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.all(20),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 175,
+              childAspectRatio: 2.0,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+            ),
+            itemCount: Palette.values.length * 2,
+            itemBuilder: (context, index) {
+              Palette color = Palette.values[index ~/ 2];
+              bool isDark = index % 2 == 1;
+              return GestureDetector(
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.black : Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Center(
+                    child: Container(
+                      margin: EdgeInsets.all(10),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: color.background,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Text(
+                        // Hana for my wife
+                        color == Palette.lightPink && isDark
+                            ? 'Hana'
+                            : color.label,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: color.isDark ? Colors.white : Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+                onTap: () {
+                  theme.updateTheme(color, isDark);
+                  _saveTheme(color, isDark);
+                  Navigator.of(context).pop();
+                },
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 
   Future<bool> _confirm(BuildContext context, String message) async {
     return await showDialog(
@@ -111,15 +171,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future _saveTheme(Palette color, bool isDark) async {
+    await SettingsProvider.updateSetting(Setting.themeColor, color.id);
+    await SettingsProvider.updateSetting(Setting.themeIsDark, isDark ? 1 : 0);
+  }
+
   Future _deleteAllGames() async {
-    var database = await Provider.gameDatabase;
-    await Provider.createGameDatabase(database);
+    var database = await DatabaseProvider.gameDatabase;
+    await DatabaseProvider.createGameDatabase(database);
   }
 
   Future _deleteAllData() async {
-    var settings = await Provider.settingsDatabase;
-    await Provider.createSettingsDatabase(settings);
-    var games = await Provider.gameDatabase;
-    await Provider.createGameDatabase(games);
+    var settings = await DatabaseProvider.settingsDatabase;
+    await DatabaseProvider.createSettingsDatabase(settings);
+    var games = await DatabaseProvider.gameDatabase;
+    await DatabaseProvider.createGameDatabase(games);
   }
 }

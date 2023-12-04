@@ -1,13 +1,13 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:gamesheet/db/settings.dart';
-import 'package:gamesheet/provider/database.dart' as db;
-import 'package:gamesheet/provider/settings_provider.dart';
-import 'package:gamesheet/screens/home.dart';
-import 'package:gamesheet/themes/themes.dart';
 import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
+import './common/settings.dart';
+import './db/database.dart';
+import './db/settings_provider.dart';
+import './screens/home.dart';
+import './common/themes.dart';
 
 const double windowWidth = 400;
 const double windowHeight = 800;
@@ -15,10 +15,10 @@ const double windowHeight = 800;
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   platformInit();
-  await db.Provider.initialize();
+  await DatabaseProvider.initialize();
   SettingsMap settings = await SettingsProvider.getSettings();
   runApp(ThemeChangerWidget(
-    initialTheme: settings.themeData,
+    settings: settings,
   ));
 }
 
@@ -39,19 +39,20 @@ void platformInit() {
 }
 
 class ThemeChangerWidget extends StatelessWidget {
-  final ThemeData initialTheme;
+  final SettingsMap settings;
 
   const ThemeChangerWidget({
     super.key,
-    required this.initialTheme,
+    required this.settings,
   });
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeChanger(initialTheme)),
-      ],
+    return ChangeNotifierProvider(
+      create: (_) => ThemeChanger(
+        settings.themeColor,
+        settings.themeIsDark,
+      ),
       child: MyApp(),
     );
   }
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
     final theme = Provider.of<ThemeChanger>(context);
     return MaterialApp(
       title: 'Gamesheet',
-      theme: theme.themeData,
+      theme: theme.data,
       home: const HomeScreen(),
     );
   }

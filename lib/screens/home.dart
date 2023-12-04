@@ -1,22 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
-import 'package:gamesheet/db/game.dart';
-import 'package:gamesheet/provider/game_provider.dart';
+import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/db/game_provider.dart';
 import 'package:gamesheet/screens/creategame.dart';
 import 'package:gamesheet/screens/game.dart';
-import 'package:gamesheet/screens/settings.dart';
-import 'package:gamesheet/widgets/card.dart';
-import 'package:gamesheet/widgets/game_list.dart';
 import 'package:material_symbols_icons/symbols.dart';
-
-enum HomeMenuItem {
-  refresh('Refresh'),
-  settings('Settings');
-
-  final String label;
-
-  const HomeMenuItem(this.label);
-}
+import './home/home_menu.dart';
+import './home/game_list.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,29 +28,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gamesheet'),
+        title: const Text('Gamesheet'),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Symbols.refresh),
-            tooltip: 'Refresh Game List',
-            onPressed: _fetchGames,
-          ),
-          PopupMenuButton<HomeMenuItem>(
-            onSelected: (item) {
-              switch (item) {
-                case HomeMenuItem.refresh:
-                  _fetchGames();
-                case HomeMenuItem.settings:
-                  _navigate(const SettingsScreen());
-              }
-            },
-            itemBuilder: (_) => HomeMenuItem.values.map((item) {
-              return PopupMenuItem<HomeMenuItem>(
-                value: item,
-                child: Text(item.label),
-              );
-            }).toList(),
-          ),
+          HomeMenuList(onSelected: _navigate),
         ],
       ),
       body: _games == null
@@ -69,14 +39,18 @@ class _HomeScreenState extends State<HomeScreen> {
               size: 50,
             )
           : Padding(
-              padding: EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: 8),
               child: GameList(
                 games: _games!,
-                onTap: (context, index) =>
-                    _navigate(GameScreen(_games![index])),
-                onDelete: (context, index) {
-                  int? id = _games == null ? null : _games![index].id;
-                  if (id != null) _removeGame(id!);
+                onTap: (index) {
+                  if (_games != null && index < _games!.length)
+                    _navigate(GameScreen(_games![index]));
+                },
+                onDelete: (index) {
+                  if (_games != null && index < _games!.length) {
+                    int? id = _games![index].id;
+                    if (id != null) _removeGame(id!);
+                  }
                 },
               ),
             ),
@@ -96,10 +70,13 @@ class _HomeScreenState extends State<HomeScreen> {
     GameProvider.removeGame(gameId).then((_) => _fetchGames());
   }
 
-  Future _navigate(Widget screen) async {
-    final bool? reload = await Navigator.of(context).push(
+  void _navigate(Widget screen) {
+    Navigator.of(context)
+        .push(
       MaterialPageRoute(builder: (context) => screen),
-    );
-    if (reload != null && reload!) _fetchGames();
+    )
+        .then((reload) {
+      if (reload != null && reload!) _fetchGames();
+    });
   }
 }

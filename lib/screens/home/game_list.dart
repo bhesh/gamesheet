@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:gamesheet/db/game.dart';
+import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/message.dart';
 
 class GameList extends StatelessWidget {
   final List<Game> games;
-  final void Function(BuildContext, int) onTap;
-  final void Function(BuildContext, int) onDelete;
+  final void Function(int) onTap;
+  final void Function(int) onDelete;
 
   const GameList({
     super.key,
@@ -28,23 +28,25 @@ class GameList extends StatelessWidget {
       shrinkWrap: true,
       itemCount: games.length,
       itemBuilder: (context, index) {
-        final name = "${games[index].id}";
+        assert(index < games.length);
+        assert(games[index].id != null);
+        final id = "${games[index].id}";
         return Dismissible(
-          key: Key(name),
+          key: Key(id),
           direction: DismissDirection.endToStart,
-          onDismissed: (direction) => onDelete(context, index),
-          confirmDismiss: (direction) => _confirmDismiss(context),
+          onDismissed: (_) => onDelete(index),
+          confirmDismiss: (_) => _confirmDismiss(context),
           background: Padding(
-            padding: EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: 8),
             child: Container(color: Theme.of(context).colorScheme.error),
           ),
           child: GestureDetector(
-            onTap: () => onTap(context, index),
+            onTap: () => onTap(index),
             child: GamesheetCard(
               child: Row(
                 children: <Widget>[
                   Padding(
-                      padding: EdgeInsets.only(left: 8, right: 16),
+                      padding: const EdgeInsets.only(left: 8, right: 16),
                       child: Icon(
                         games[index].type.icon,
                         size: 40.0,

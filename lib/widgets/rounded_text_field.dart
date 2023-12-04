@@ -29,7 +29,7 @@ class RoundedTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    TextStyle? hintStyle = Theme.of(context).inputDecorationTheme?.hintStyle;
+    TextStyle? hintStyle = Theme.of(context).inputDecorationTheme.hintStyle;
     return Container(
       padding: padding,
       width: size.width * 0.8,
@@ -53,9 +53,12 @@ class RoundedTextField extends StatelessWidget {
           hintStyle: errorText == null
               ? hintStyle
               : hintStyle == null
-                  ? TextStyle(color: Theme.of(context).colorScheme.error)
+                  ? TextStyle(
+                      color:
+                          Theme.of(context).colorScheme.error.withOpacity(0.7))
                   : hintStyle!.copyWith(
-                      color: Theme.of(context).colorScheme.error,
+                      color:
+                          Theme.of(context).colorScheme.error.withOpacity(0.7),
                     ),
         ),
       ),

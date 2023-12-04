@@ -44,4 +44,42 @@ class Game {
     if (id != null) map['id'] = id!;
     return map;
   }
+
+  int numRounds(int numPlayers) {
+    switch (type) {
+      case GameType.train:
+        return 13;
+      case GameType.ping:
+        return 11;
+      case GameType.wizard:
+        return 60 ~/ numPlayers;
+    }
+  }
+
+  List<String> roundLabels(int numPlayers) {
+    switch (type) {
+      case GameType.train:
+        return List.generate(13, (index) => '${13 - index - 1}');
+      case GameType.ping:
+        return [
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          'J',
+          'Q',
+          'K',
+        ];
+      case GameType.wizard:
+        return List.generate(numRounds(numPlayers), (index) => '${index + 1}');
+    }
+  }
+
+  String get bidText => 'bid';
+
+  String get scoreText => type == GameType.wizard ? 'tricks' : 'score';
 }

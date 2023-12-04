@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:gamesheet/provider/database.dart';
-import 'package:gamesheet/db/settings.dart';
+import 'package:gamesheet/common/color.dart';
+import 'package:gamesheet/common/settings.dart';
+import './database.dart';
 
 class SettingsProvider {
   static SettingsMap? _settings;
@@ -9,40 +9,46 @@ class SettingsProvider {
       _settings != null ? _settings! : await getSettings();
 
   static Future<SettingsMap> getSettings() async {
-    ThemeSelection? themeSelection = null;
+    Palette? themeColor = null;
+    bool? themeIsDark = null;
 
-    var database = await Provider.settingsDatabase;
+    var database = await DatabaseProvider.settingsDatabase;
     List<Map<String, dynamic>> list = await database.query('settings');
     list.forEach((row) {
       var setting = Setting.fromId(row['id']);
       switch (setting) {
-        case Setting.themeSelection:
-          themeSelection = ThemeSelection.fromId(row['value']);
+        case Setting.themeColor:
+          themeColor = Palette.fromId(row['value']);
+        case Setting.themeIsDark:
+          themeIsDark = row['value'] != 0;
       }
     });
 
-    _settings = SettingsMap(themeSelection: themeSelection);
+    _settings = SettingsMap(
+      themeColor: themeColor,
+      themeIsDark: themeIsDark,
+    );
 
     return _settings!;
   }
 
-  static Future updateSetting(int id, int value) async {
-    var database = await Provider.settingsDatabase;
+  static Future updateSetting(Setting setting, int value) async {
+    var database = await DatabaseProvider.settingsDatabase;
     await database.update(
       'settings',
       {'value': value},
       where: 'id = ?',
-      whereArgs: [id],
+      whereArgs: [setting.id],
     );
   }
 
   static Future updateAllSettings(SettingsMap map) async {
-    var database = await Provider.settingsDatabase;
+    var database = await DatabaseProvider.settingsDatabase;
     var batch = database.batch();
     map.toMap().forEach(
           (row) => batch.update(
             'settings',
-            row,
+            {'value': row['value']},
             where: 'id = ?',
             whereArgs: [row['id']],
           ),

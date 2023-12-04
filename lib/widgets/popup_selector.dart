@@ -47,7 +47,7 @@ class PopupSelector extends StatelessWidget {
       context: context,
       builder: (context) {
         return Padding(
-          padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+          padding: EdgeInsets.all(20),
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: itemCount,

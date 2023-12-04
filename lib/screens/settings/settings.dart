@@ -22,7 +22,12 @@ class SettingsSection extends StatelessWidget {
         : headerStyle!;
     List<Widget> widgets = [
       Padding(
-        padding: EdgeInsets.only(top: 16, bottom: 16, left: 48, right: 16),
+        padding: const EdgeInsets.only(
+          top: 16,
+          bottom: 16,
+          left: 48,
+          right: 16,
+        ),
         child: Text(
           header,
           style: _headerStyle,
@@ -31,7 +36,12 @@ class SettingsSection extends StatelessWidget {
     ];
     for (int i = 0; i < children.length; ++i)
       widgets.add(Padding(
-        padding: EdgeInsets.only(top: 16, bottom: 16, left: 48, right: 16),
+        padding: const EdgeInsets.only(
+          top: 16,
+          bottom: 16,
+          left: 48,
+          right: 16,
+        ),
         child: children[i],
       ));
     return Column(
@@ -44,14 +54,14 @@ class SettingsSection extends StatelessWidget {
 class SettingsField extends StatelessWidget {
   final String title;
   final String description;
-  final void Function() onTap;
+  final void Function()? onTap;
   final Widget? suffixWidget;
 
   const SettingsField({
     super.key,
     required this.title,
     required this.description,
-    required this.onTap,
+    this.onTap,
     this.suffixWidget,
   });
 
@@ -64,7 +74,7 @@ class SettingsField extends StatelessWidget {
           Text(description),
         ],
       ),
-      Spacer(),
+      const Spacer(),
     ];
     if (suffixWidget != null) children.add(suffixWidget!);
     return GestureDetector(

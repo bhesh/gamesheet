@@ -1,27 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:gamesheet/widgets/card.dart';
-import 'package:gamesheet/widgets/message.dart';
 
-typedef TabBuilder = Tab Function(BuildContext, int);
-
-typedef PageSliverBuilder = Widget Function(BuildContext, int);
-
-class ScoreKeeper extends StatelessWidget {
+class GameScaffold extends StatelessWidget {
   final String title;
   final int numTabs;
-  final TabBuilder headerBuilder;
-  final PageSliverBuilder pageBuilder;
-  final TabController? controller;
+  final Tab Function(BuildContext, int) headerBuilder;
+  final Widget Function(BuildContext, int) pageBuilder;
+  final TabController controller;
 
-  ScoreKeeper({
+  const GameScaffold({
     super.key,
     required this.title,
-    required this.numTabs,
+    int? numTabs,
     required this.headerBuilder,
     required this.pageBuilder,
-    this.controller,
-  });
+    required this.controller,
+  }) : this.numTabs = numTabs ?? 1;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +41,7 @@ class ScoreKeeper extends StatelessWidget {
         ];
       },
       body: Padding(
-        padding: EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.only(top: 8),
         child: TabBarView(
           controller: controller,
           children: List.generate(

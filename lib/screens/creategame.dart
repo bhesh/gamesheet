@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:gamesheet/db/color.dart';
-import 'package:gamesheet/db/game.dart';
-import 'package:gamesheet/provider/game_provider.dart';
+import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/db/game_provider.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/loader.dart';
-import 'package:gamesheet/widgets/player_text_fields.dart';
-import 'package:gamesheet/widgets/popup_selector.dart';
 import 'package:gamesheet/widgets/rounded_text_field.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import './creategame/player_controller.dart';
+import './creategame/player_text_fields.dart';
+import './creategame/game_type_popup.dart';
 
 const int maxNumPlayers = 16;
+const int maxNameLength = 40;
 
 class CreateGameScreen extends StatefulWidget {
   const CreateGameScreen({super.key});
@@ -48,7 +49,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         title: Text('Create Game'),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Symbols.add_box),
+            icon: const Icon(Symbols.add_box),
             tooltip: 'Create Game',
             onPressed: () => _createGame(context),
           ),
@@ -63,60 +64,17 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
             GamesheetCard(
               child: RoundedTextField(
                 controller: _nameController,
-                icon: Icon(Symbols.videogame_asset),
+                icon: const Icon(Symbols.videogame_asset),
                 hintText: 'Game Name',
                 errorText: _nameError,
               ),
             ),
             GamesheetCard(
               title: 'Select game type',
-              child: PopupSelector(
-                initialSelection: Row(
-                  children: <Widget>[
-                    Icon(_selectedGameType.icon),
-                    Padding(
-                      padding: EdgeInsets.only(left: 16),
-                      child: Text(
-                        _selectedGameType.label,
-                        style:
-                            Theme.of(context).inputDecorationTheme?.hintStyle,
-                      ),
-                    ),
-                  ],
-                ),
-                selectionPadding:
-                    EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                itemPadding: EdgeInsets.symmetric(vertical: 5),
-                itemCount: GameType.values.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(29),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(GameType.values[index].icon, size: 48),
-                        Padding(
-                          padding: EdgeInsets.only(left: 16),
-                          child: Text(
-                            GameType.values[index].label,
-                            style: Theme.of(context)
-                                .inputDecorationTheme
-                                ?.hintStyle,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                onSelected: (index) => setState(
-                  () => _selectedGameType = GameType.values[index],
-                ),
+              child: GameTypePopup(
+                selected: _selectedGameType,
+                onSelected: (gameType) =>
+                    setState(() => _selectedGameType = gameType),
               ),
             ),
             GamesheetCard(
@@ -124,15 +82,17 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
               child: PlayerTextFields(
                 controllers: _playerControllers,
                 maxNumPlayers: maxNumPlayers,
-                maxNameLength: 20,
+                maxNameLength: maxNameLength,
                 hintText: 'Player Name',
                 errorText: _playerError,
-                onAdd: (context) => setState(() {
+                onAdd: () => setState(() {
                   _playerError = null;
                   _playerControllers.add(PlayerController.random());
                 }),
-                onAvatar: (context, index) => _colorChooser(context, index),
-                onDelete: (context, index) => setState(() {
+                onColorChange: (index, color) => setState(
+                  () => _playerControllers[index].setColor(color),
+                ),
+                onDelete: (index) => setState(() {
                   _playerControllers.removeAt(index).dispose();
                 }),
               ),
@@ -175,42 +135,5 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         );
       }).then((_) => Navigator.of(context).pop(true));
     }
-  }
-
-  void _colorChooser(BuildContext context, int playerIndex) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(top: 20, left: 20, right: 20),
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 75,
-              childAspectRatio: 1.0,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-            ),
-            itemCount: GameColor.numColors,
-            itemBuilder: (context, colorIndex) {
-              return GestureDetector(
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: GameColor.values[colorIndex].background,
-                    borderRadius: BorderRadius.circular(37.5),
-                  ),
-                ),
-                onTap: () {
-                  setState(() => _playerControllers[playerIndex].setColor(
-                        GameColor.values[colorIndex],
-                      ));
-                  Navigator.of(context).pop(true);
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
   }
 }

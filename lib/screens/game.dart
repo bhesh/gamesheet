@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
-import 'package:flutter/services.dart';
-import 'package:gamesheet/db/color.dart';
-import 'package:gamesheet/db/game.dart';
-import 'package:gamesheet/db/player.dart';
-import 'package:gamesheet/db/round.dart';
-import 'package:gamesheet/provider/game_provider.dart';
-import 'package:gamesheet/widgets/avatar.dart';
-import 'package:gamesheet/widgets/card.dart';
-import 'package:gamesheet/widgets/score_keeper.dart';
+import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/common/player.dart';
+import 'package:gamesheet/common/round.dart';
+import 'package:gamesheet/common/games/game_player.dart';
+import 'package:gamesheet/common/games/ping.dart';
+import 'package:gamesheet/common/games/train.dart';
+import 'package:gamesheet/common/games/wizard.dart';
+import 'package:gamesheet/db/game_provider.dart';
+import './game/overview_tab.dart';
+import './game/round_controller.dart';
+import './game/round_tab.dart';
+import './game/scaffold.dart';
 
 class GameScreen extends StatefulWidget {
   final Game game;
@@ -20,149 +22,187 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
-  late final bool hasBets;
+  late final bool _hasBids;
   late final List<String> _roundLabels;
   late final TabController _tabController;
-  late final List<Player>? _players;
+  late final List<Player> _players;
+  late final List<GamePlayer> _gamePlayers;
+  // [round index][player index] = controller
+  late final List<List<RoundController?>> _rounds;
 
-  bool initialized = false;
-  List<List<Round>>? _rounds;
+  // Easier way to track the state of initialization
+  bool _playersInitialized = false;
+  bool _roundsInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _initialize();
+    // initialize the players and controllers first
+    _initializePlayers().then(
+      (_) => setState(() {
+        _playersInitialized = true;
+        // then look for round data
+        _initializeRounds().then(
+          (_) => setState(() {
+            _roundsInitialized = true;
+          }),
+        );
+      }),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: initialized
-          ? _buildInner(context)
-          : SpinKitRing(
-              color: Theme.of(context).colorScheme.primary,
-              size: 50,
-            ),
-    );
-  }
+    // Assert everything
+    bool hasBids = false;
+    List<String>? roundLabels = null;
+    TabController? tabController = null;
+    List<Player>? players = null;
+    List<List<RoundController?>>? rounds = null;
+    if (_playersInitialized) {
+      hasBids = _hasBids;
+      roundLabels = _roundLabels;
+      tabController = _tabController;
+      players = _players;
+      if (_roundsInitialized) {
+        assert(_roundLabels.length == _rounds.length);
+        rounds = _rounds;
+      }
+    }
 
-  Widget _buildInner(BuildContext context) {
-    return ScoreKeeper(
-      controller: _tabController,
-      title: widget.game.name,
-      numTabs: _roundLabels.length,
-      headerBuilder: (context, index) => Tab(
-        child: Container(
-          constraints: BoxConstraints(minWidth: 32),
-          child: Center(
-            child: Text(
-              _roundLabels[index],
-              style: Theme.of(context).primaryTextTheme.labelMedium,
+    return Scaffold(
+      body: GameScaffold(
+        controller: tabController ?? TabController(length: 1, vsync: this),
+        title: widget.game.name,
+        numTabs: roundLabels == null ? 1 : roundLabels!.length + 1,
+        headerBuilder: (context, page) => Tab(
+          child: Container(
+            constraints: const BoxConstraints(minWidth: 32),
+            child: Center(
+              child: Text(
+                // if page == 0 => Overview, else roundLabels[page - 1]
+                page == 0
+                    ? 'Overview'
+                    : roundLabels == null
+                        ? '...'
+                        : roundLabels![page - 1],
+                style: Theme.of(context)
+                    .textTheme
+                    .labelMedium
+                    ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+              ),
             ),
           ),
         ),
+        pageBuilder: (context, page) {
+          // Overview
+          if (page == 0) {
+            return OverviewTab(
+              game: widget.game,
+              players: _playersInitialized ? _gamePlayers : null,
+            );
+          }
+
+          // Overview is 0 so round is `page - 1`
+          int round = page - 1;
+          List<Player>? players = _playersInitialized ? _players! : null;
+          List<RoundController?>? controllers = null;
+          bool hasBids = _playersInitialized ? _hasBids! : false;
+          if (_roundsInitialized) {
+            assert(round < _rounds.length);
+            controllers = _rounds[round];
+          }
+          return RoundTab(
+            players: players,
+            controllers: controllers,
+            hasBids: hasBids,
+            onScoreChange: (index) => _updateScore(round, index),
+            bidText: widget.game.bidText,
+            scoreText: widget.game.scoreText,
+          );
+        },
       ),
-      pageBuilder: (context, page) => _buildPage(context, page),
     );
   }
 
-  Widget _buildPage(BuildContext context, int page) {
-    return SliverList.builder(
-      itemCount: _players == null ? 1 : _players!.length,
-      itemBuilder: (context, index) {
-        List<Widget> children = [
-          GamesheetAvatar(
-            name: _players![index].name,
-            color: _players![index].color,
-          ),
-          Padding(padding: EdgeInsets.only(right: 16)),
-          Container(
-            width: hasBets ? 100 : 186,
-            child: Text(
-              _players![index].name,
-              style: Theme.of(context).textTheme.titleMedium,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Spacer(),
-        ];
-        if (hasBets) {
-          children.add(
-            Container(
-              width: 70,
-              child: TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Bet',
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-              ),
+  Future _initializePlayers() async {
+    assert(widget.game.id != null);
+    List<Player> players = await GameProvider.getPlayers(widget.game.id!);
+    assert(players.length > 0);
+
+    // Initialize everything
+    _players = players;
+    _hasBids = widget.game.type == GameType.wizard;
+    _roundLabels = widget.game.roundLabels(_players.length);
+    _tabController = TabController(
+      length: _roundLabels.length + 1, // overview + rounds
+      vsync: this,
+    );
+    _rounds = List.generate(
+      _roundLabels.length,
+      (_) => List.filled(_players.length, null),
+    );
+
+    // Make GamePlayers which keeps track of total scores
+    switch (widget.game.type) {
+      case GameType.train:
+        _gamePlayers = List.generate(
+          _players.length,
+          (index) => TrainPlayer(_players[index], _roundLabels.length),
+        );
+      case GameType.ping:
+        _gamePlayers = List.generate(
+          _players.length,
+          (index) => PingPlayer(_players[index], _roundLabels.length),
+        );
+      case GameType.wizard:
+        _gamePlayers = List.generate(
+          _players.length,
+          (index) => WizardPlayer(_players[index], _roundLabels.length),
+        );
+    }
+  }
+
+  Future _initializeRounds() async {
+    assert(widget.game.id != null);
+    List<Round> rounds = await GameProvider.getAllRounds(widget.game.id!);
+    rounds.forEach((round) {
+      assert(round.round < _rounds.length);
+      var playerInd = _players.indexWhere((player) {
+        assert(player.id != null);
+        return player.id! == round.playerId;
+      });
+      assert(playerInd < _rounds[round.round].length);
+      _rounds[round.round][playerInd] = RoundController(round);
+      _gamePlayers[playerInd].setRound(round);
+    });
+
+    // This should not be needed anymore but leaving it here just in case.
+    // It ensures there are no NULL round controllers. This runs async so
+    // the performance hit should not be too great.
+    for (int i = 0; i < _rounds.length; ++i) {
+      for (int j = 0; j < _rounds[i].length; ++j) {
+        if (_rounds[i][j] == null) {
+          _rounds[i][j] = RoundController(
+            Round(
+              gameId: widget.game.id!,
+              playerId: _players[j].id!,
+              round: i,
             ),
           );
-          children.add(Padding(padding: EdgeInsets.only(right: 16)));
         }
-        children.add(
-          Container(
-            width: 70,
-            child: TextField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Score',
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-            ),
-          ),
-        );
-        return GamesheetCard(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          child: Row(children: children),
-        );
-      },
-    );
+      }
+    }
   }
 
-  void _initialize() {
-    if (widget.game.id != null) {
-      GameProvider.getPlayers(widget.game.id!).then(
-        (players) => setState(() {
-          hasBets = widget.game.type == GameType.wizard;
-          switch (widget.game.type) {
-            case GameType.train:
-              _roundLabels = List.generate(13, (index) => '${13 - index - 1}');
-            case GameType.ping:
-              _roundLabels = [
-                '3',
-                '4',
-                '5',
-                '6',
-                '7',
-                '8',
-                '9',
-                '10',
-                'J',
-                'Q',
-                'K',
-              ];
-            case GameType.wizard:
-              _roundLabels =
-                  List.generate(60 ~/ players.length, (index) => '$index');
-          }
-          _tabController =
-              TabController(length: _roundLabels.length, vsync: this);
-          _players = players;
-          initialized = true;
-        }),
-      );
+  void _updateScore(int round, int playerInd) {
+    assert(round < _rounds.length);
+    List<RoundController?> roundScores = _rounds[round];
+    assert(playerInd < _gamePlayers.length);
+    GamePlayer player = _gamePlayers[playerInd];
+    assert(roundScores.length == _gamePlayers.length);
+    if (roundScores[playerInd] != null) {
+      setState(() => player.setRound(roundScores[playerInd]!.round));
     }
   }
 }
