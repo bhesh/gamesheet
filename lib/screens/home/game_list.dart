@@ -1,28 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/db/game.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/message.dart';
 
 class GameList extends StatelessWidget {
-  final List<Game> games;
-  final void Function(int) onTap;
-  final void Function(int) onDelete;
-
-  const GameList({
-    super.key,
-    required this.games,
-    required this.onTap,
-    required this.onDelete,
-  });
+  const GameList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return games.isNotEmpty
-        ? _buildListView(context)
-        : GamesheetMessage('No games');
+    final List<Game>? games = context.watch();
+    return games == null
+        ? SpinKitRing(
+            color: Theme.of(context).colorScheme.primary,
+            size: 50,
+          )
+        : games!.isNotEmpty
+            ? _buildListView(context, games!)
+            : GamesheetMessage('No games');
   }
 
-  Widget _buildListView(BuildContext context) {
+  Widget _buildListView(BuildContext context, List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -34,7 +32,7 @@ class GameList extends StatelessWidget {
         return Dismissible(
           key: Key(id),
           direction: DismissDirection.endToStart,
-          onDismissed: (_) => onDelete(index),
+          onDismissed: (_) => GameDatabase.removeGame(gameId),
           confirmDismiss: (_) => _confirmDismiss(context),
           background: Padding(
             padding: const EdgeInsets.only(bottom: 8),

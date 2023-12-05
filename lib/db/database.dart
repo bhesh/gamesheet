@@ -10,7 +10,7 @@ DatabaseFactory get databaseFactory => (Platform.isLinux || Platform.isWindows)
     ? databaseFactoryFfi
     : sqflite.databaseFactory;
 
-class DatabaseProvider {
+class AppDatabase {
   static Database? _settingsDatabase;
   static Database? _gameDatabase;
 
@@ -53,8 +53,8 @@ class DatabaseProvider {
       )
       ''',
     );
-    batch.insert('settings', { 'id' : 1, 'value' : 11 });
-    batch.insert('settings', { 'id' : 2, 'value' : 0 });
+    batch.insert('settings', {'id': 1, 'value': 11});
+    batch.insert('settings', {'id': 2, 'value': 0});
     await batch.commit(noResult: true);
   }
 

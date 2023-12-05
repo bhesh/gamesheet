@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/game.dart';
-import 'package:gamesheet/db/game_provider.dart';
+import 'package:gamesheet/db/game.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/loader.dart';
 import 'package:gamesheet/widgets/rounded_text_field.dart';
@@ -125,7 +125,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         _playerError = null;
       });
       loaderDialog(context, () async {
-        await GameProvider.addGame(
+        await GameDatabase.addGame(
           Game(
             name: finalizedName,
             type: _selectedGameType,

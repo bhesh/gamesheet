@@ -3,7 +3,7 @@ import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/settings.dart';
 import 'package:gamesheet/common/themes.dart';
 import 'package:gamesheet/db/database.dart';
-import 'package:gamesheet/db/settings_provider.dart';
+import 'package:gamesheet/db/settings.dart';
 import 'package:gamesheet/widgets/loader.dart';
 import 'package:provider/provider.dart';
 import './settings/settings.dart';
@@ -172,19 +172,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future _saveTheme(Palette color, bool isDark) async {
-    await SettingsProvider.updateSetting(Setting.themeColor, color.id);
-    await SettingsProvider.updateSetting(Setting.themeIsDark, isDark ? 1 : 0);
+    await SettingsDatabase.updateSetting(Setting.themeColor, color.id);
+    await SettingsDatabase.updateSetting(Setting.themeIsDark, isDark ? 1 : 0);
   }
 
   Future _deleteAllGames() async {
-    var database = await DatabaseProvider.gameDatabase;
-    await DatabaseProvider.createGameDatabase(database);
+    var database = await AppDatabase.gameDatabase;
+    await AppDatabase.createGameDatabase(database);
   }
 
   Future _deleteAllData() async {
-    var settings = await DatabaseProvider.settingsDatabase;
-    await DatabaseProvider.createSettingsDatabase(settings);
-    var games = await DatabaseProvider.gameDatabase;
-    await DatabaseProvider.createGameDatabase(games);
+    var settings = await AppDatabase.settingsDatabase;
+    await AppDatabase.createSettingsDatabase(settings);
+    var games = await AppDatabase.gameDatabase;
+    await AppDatabase.createGameDatabase(games);
   }
 }

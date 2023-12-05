@@ -6,7 +6,7 @@ import 'package:gamesheet/common/games/game_player.dart';
 import 'package:gamesheet/common/games/ping.dart';
 import 'package:gamesheet/common/games/train.dart';
 import 'package:gamesheet/common/games/wizard.dart';
-import 'package:gamesheet/db/game_provider.dart';
+import 'package:gamesheet/db/game.dart';
 import './game/overview_tab.dart';
 import './game/round_controller.dart';
 import './game/round_tab.dart';
@@ -127,7 +127,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   Future _initializePlayers() async {
     assert(widget.game.id != null);
-    List<Player> players = await GameProvider.getPlayers(widget.game.id!);
+    List<Player> players = await GameDatabase.getPlayers(widget.game.id!);
     assert(players.length > 0);
 
     // Initialize everything
@@ -165,7 +165,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   Future _initializeRounds() async {
     assert(widget.game.id != null);
-    List<Round> rounds = await GameProvider.getAllRounds(widget.game.id!);
+    List<Round> rounds = await GameDatabase.getAllRounds(widget.game.id!);
     rounds.forEach((round) {
       assert(round.round < _rounds.length);
       var playerInd = _players.indexWhere((player) {

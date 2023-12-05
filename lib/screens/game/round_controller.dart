@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/round.dart';
-import 'package:gamesheet/db/game_provider.dart';
+import 'package:gamesheet/db/game.dart';
 
 class RoundController {
   final TextEditingController bidController;
@@ -27,7 +27,7 @@ class RoundController {
     var newBid = value.isEmpty ? -1 : int.parse(value);
     if (bid != newBid) {
       round = round.copyWith(bid: newBid);
-      await GameProvider.updateRound(round);
+      await GameDatabase.updateRound(round);
       return true;
     }
     return false;
@@ -40,7 +40,7 @@ class RoundController {
     var newScore = value.isEmpty ? -1 : int.parse(value);
     if (score != newScore) {
       round = round.copyWith(score: newScore);
-      await GameProvider.updateRound(round);
+      await GameDatabase.updateRound(round);
       return true;
     }
     return false;

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 import './common/settings.dart';
 import './db/database.dart';
-import './db/settings_provider.dart';
+import './db/settings.dart';
 import './screens/home.dart';
 import './common/themes.dart';
 
@@ -15,8 +15,8 @@ const double windowHeight = 800;
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   platformInit();
-  await DatabaseProvider.initialize();
-  SettingsMap settings = await SettingsProvider.getSettings();
+  await AppDatabase.initialize();
+  SettingsMap settings = await SettingsDatabase.getSettings();
   runApp(ThemeChangerWidget(
     settings: settings,
   ));

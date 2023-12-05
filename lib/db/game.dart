@@ -4,15 +4,15 @@ import 'package:gamesheet/common/player.dart';
 import 'package:gamesheet/common/round.dart';
 import './database.dart';
 
-class GameProvider {
+class GameDatabase {
   static Future<List<Game>> getGames() async {
-    var database = await DatabaseProvider.gameDatabase;
+    var database = await AppDatabase.gameDatabase;
     var list = await database.query('games');
     return list.map((map) => Game.fromMap(map)).toList();
   }
 
   static Future<List<Player>> getPlayers(int gameId) async {
-    var database = await DatabaseProvider.gameDatabase;
+    var database = await AppDatabase.gameDatabase;
     var list = await database.query(
       'players',
       where: 'gameId = ?',
@@ -22,7 +22,7 @@ class GameProvider {
   }
 
   static Future<List<Round>> getRound(int gameId, int round) async {
-    var database = await DatabaseProvider.gameDatabase;
+    var database = await AppDatabase.gameDatabase;
     var list = await database.query(
       'rounds',
       where: 'gameId = ? AND round = ?',
@@ -32,7 +32,7 @@ class GameProvider {
   }
 
   static Future<List<Round>> getAllRounds(int gameId) async {
-    var database = await DatabaseProvider.gameDatabase;
+    var database = await AppDatabase.gameDatabase;
     var list = await database.query(
       'rounds',
       where: 'gameId = ?',
@@ -45,7 +45,7 @@ class GameProvider {
     Game game,
     List<(String, Palette)> players,
   ) async {
-    var database = await DatabaseProvider.gameDatabase;
+    var database = await AppDatabase.gameDatabase;
     int gameId = await database.insert('games', game.toMap());
     var batch = database.batch();
     players.forEach((item) {
@@ -73,7 +73,7 @@ class GameProvider {
   }
 
   static Future updateRound(Round round) async {
-    var database = await DatabaseProvider.gameDatabase;
+    var database = await AppDatabase.gameDatabase;
     var map = round.toMap();
     if (map.containsKey('id')) {
       await database.update(
@@ -88,7 +88,7 @@ class GameProvider {
   }
 
   static Future removeGame(int gameId) async {
-    var database = await DatabaseProvider.gameDatabase;
+    var database = await AppDatabase.gameDatabase;
     var batch = database.batch();
     batch.delete('rounds', where: 'gameId = ?', whereArgs: [gameId]);
     batch.delete('players', where: 'gameId = ?', whereArgs: [gameId]);
