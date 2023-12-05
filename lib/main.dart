@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 import './common/settings.dart';
-import './db/database.dart';
+import './db/app.dart';
 import './db/settings.dart';
 import './screens/home.dart';
 import './common/themes.dart';
@@ -18,7 +18,7 @@ Future main() async {
   await AppDatabase.initialize();
   SettingsMap settings = await SettingsDatabase.getSettings();
   runApp(ThemeChangerWidget(
-    settings: settings,
+    initialSettings: settings,
   ));
 }
 
@@ -39,19 +39,19 @@ void platformInit() {
 }
 
 class ThemeChangerWidget extends StatelessWidget {
-  final SettingsMap settings;
+  final SettingsMap initialSettings;
 
   const ThemeChangerWidget({
     super.key,
-    required this.settings,
+    required this.initialSettings,
   });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ThemeChanger(
-        settings.themeColor,
-        settings.themeIsDark,
+        initialSettings.themeColor,
+        initialSettings.themeIsDark,
       ),
       child: MyApp(),
     );

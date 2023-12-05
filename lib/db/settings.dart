@@ -1,13 +1,8 @@
 import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/settings.dart';
-import './database.dart';
+import './app.dart';
 
 class SettingsDatabase {
-  static SettingsMap? _settings;
-
-  static Future<SettingsMap> get settings async =>
-      _settings != null ? _settings! : await getSettings();
-
   static Future<SettingsMap> getSettings() async {
     Palette? themeColor = null;
     bool? themeIsDark = null;
@@ -23,13 +18,10 @@ class SettingsDatabase {
           themeIsDark = row['value'] != 0;
       }
     });
-
-    _settings = SettingsMap(
+    return SettingsMap(
       themeColor: themeColor,
       themeIsDark: themeIsDark,
     );
-
-    return _settings!;
   }
 
   static Future updateSetting(Setting setting, int value) async {
@@ -48,7 +40,7 @@ class SettingsDatabase {
     map.toMap().forEach(
           (row) => batch.update(
             'settings',
-            {'value': row['value']},
+            row,
             where: 'id = ?',
             whereArgs: [row['id']],
           ),

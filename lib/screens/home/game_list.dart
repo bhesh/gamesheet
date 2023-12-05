@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
 import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/provider/game.dart';
-import 'package:gamesheet/screens/game.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/message.dart';
 import 'package:provider/provider.dart';
 
 class GameList extends StatelessWidget {
-  const GameList({super.key});
+  final void Function(Game game)? onSelected;
+
+  const GameList({
+    super.key,
+    this.onSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +49,7 @@ class GameList extends StatelessWidget {
             child: Container(color: Theme.of(context).colorScheme.error),
           ),
           child: GestureDetector(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => GameScreen(games[index])),
-            ),
+            onTap: () => onSelected != null ? onSelected!(games[index]) : {},
             child: GamesheetCard(
               child: Row(
                 children: <Widget>[
@@ -70,7 +72,7 @@ class GameList extends StatelessWidget {
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSurface
-                                .withOpacity(0.6)),
+                                .withOpacity(0.75)),
                       ),
                     ],
                   ),

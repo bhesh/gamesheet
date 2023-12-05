@@ -1,6 +1,7 @@
 import 'dart:io';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' show join;
+import 'package:path_provider/path_provider.dart'
+    show getApplicationSupportDirectory;
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -110,8 +111,8 @@ class AppDatabase {
           gameId INTEGER NOT NULL,
           playerId INTEGER NOT NULL,
           round INTEGER NOT NULL,
-          bid INTEGER,
-          score INTEGER
+          bid INTEGER NOT NULL,
+          score INTEGER NOT NULL,
       )
       ''',
     );

@@ -66,15 +66,19 @@ class SettingsField extends StatelessWidget {
   });
 
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     List<Widget> children = [
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          Text(description),
-        ],
+      Container(
+        width: size.width - 150,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            Text(description, softWrap: true),
+          ],
+        ),
       ),
-      const Spacer(),
+      Spacer(),
     ];
     if (suffixWidget != null) children.add(suffixWidget!);
     return GestureDetector(

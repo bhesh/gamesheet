@@ -2,11 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/settings.dart';
 import 'package:gamesheet/common/themes.dart';
-import 'package:gamesheet/db/database.dart';
+import 'package:gamesheet/db/app.dart';
 import 'package:gamesheet/db/settings.dart';
 import 'package:gamesheet/widgets/loader.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import './settings/settings.dart';
+
+final Uri trainRules = Uri.parse(
+  'https://www.ultraboardgames.com/mexican-train/game-rules.php',
+);
+final Uri pingRules = Uri.parse(
+  'https://www.ultraboardgames.com/five-crowns/game-rules.php',
+);
+final Uri wizardRules = Uri.parse(
+  'https://www.ultraboardgames.com/wizard/game-rules.php',
+);
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,14 +45,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 description: theme.color == Palette.lightPink && theme.isDark
                     ? 'Hana'
                     : (theme.isDark ? 'Dark ' : 'Light ') + theme.color.label,
+                suffixWidget: Container(
+                  height: 40,
+                  width: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: theme.data.colorScheme.background,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Container(
+                      margin: EdgeInsets.all(5),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: theme.data.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+                ),
                 onTap: () => _changeTheme(theme),
               ),
             ],
           ),
           const Divider(),
-          const SettingsSection(
+          SettingsSection(
             header: 'General',
             children: <Widget>[
+              SettingsField(
+                title: 'Train Game',
+                description:
+                    'A standard domino game where the goal to score the least amount of points',
+                onTap: () => launchUrl(trainRules),
+              ),
+              SettingsField(
+                title: 'Ping',
+                description:
+                    'A card game where you combine cards into sets and runs to score the least amount of points',
+                onTap: () => launchUrl(pingRules),
+              ),
+              SettingsField(
+                title: 'Wizard',
+                description: 'A card game with initial bids and tricks',
+                onTap: () => launchUrl(wizardRules),
+              ),
               const SettingsField(
                 title: 'About',
                 description: 'Score tracker for a variety of games',
@@ -106,19 +153,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             itemBuilder: (context, index) {
               Palette color = Palette.values[index ~/ 2];
               bool isDark = index % 2 == 1;
+              ThemeData themeData = buildTheme(color.background, isDark);
               return GestureDetector(
                 child: Container(
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.black : Colors.white,
-                    borderRadius: BorderRadius.circular(5),
+                    color: themeData.colorScheme.background,
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   child: Center(
                     child: Container(
                       margin: EdgeInsets.all(10),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: color.background,
+                        color: themeData.colorScheme.primary,
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Text(
@@ -126,8 +174,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color == Palette.lightPink && isDark
                             ? 'Hana'
                             : color.label,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: color.isDark ? Colors.white : Colors.black),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(color: themeData.colorScheme.onPrimary),
                       ),
                     ),
                   ),

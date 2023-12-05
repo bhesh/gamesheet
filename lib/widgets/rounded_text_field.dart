@@ -22,7 +22,7 @@ class RoundedTextField extends StatelessWidget {
     this.controller,
     this.cursorColor,
     this.background,
-    this.padding = const EdgeInsets.only(left: 20, right: 10),
+    this.padding = const EdgeInsets.symmetric(horizontal: 10),
     this.maxLength = 40,
   });
 
@@ -45,7 +45,12 @@ class RoundedTextField extends StatelessWidget {
         cursorColor: cursorColor,
         maxLength: maxLength,
         decoration: InputDecoration(
-          icon: icon,
+          icon: Container(
+            padding: EdgeInsets.all(5),
+            height: 40,
+            width: 40,
+            child: icon,
+          ),
           suffixIcon: suffixIcon,
           hintText: errorText == null ? hintText : errorText,
           counterText: "",

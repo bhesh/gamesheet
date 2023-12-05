@@ -165,7 +165,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   Future _initializeRounds() async {
     assert(widget.game.id != null);
-    List<Round> rounds = await GameDatabase.getAllRounds(widget.game.id!);
+    List<Round> rounds = await GameDatabase.getRounds(widget.game.id!);
     rounds.forEach((round) {
       assert(round.round < _rounds.length);
       var playerInd = _players.indexWhere((player) {

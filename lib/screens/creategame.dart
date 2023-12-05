@@ -26,7 +26,6 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   GameType _selectedGameType = GameType.train;
   String? _nameError;
   String? _playerError;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -56,7 +55,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.only(top: 8),
         child: ListView(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,

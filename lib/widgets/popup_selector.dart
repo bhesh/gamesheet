@@ -16,7 +16,8 @@ class PopupSelector extends StatelessWidget {
     required this.itemBuilder,
     required this.onSelected,
     this.background,
-    this.selectionPadding = const EdgeInsets.all(5),
+    this.selectionPadding =
+        const EdgeInsets.only(top: 11, bottom: 11, left: 22, right: 10),
     this.itemPadding = const EdgeInsets.symmetric(vertical: 5),
   });
 

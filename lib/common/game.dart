@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 enum GameType {
-  train(1, 'Train', Symbols.casino),
+  train(1, 'Train', Symbols.directions_subway),
   ping(2, 'Ping', Symbols.playing_cards),
   wizard(3, 'Wizard', Symbols.settings_accessibility);
 

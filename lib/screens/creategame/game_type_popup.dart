@@ -16,29 +16,38 @@ class GameTypePopup extends StatelessWidget {
     return PopupSelector(
       initialSelection: Row(
         children: <Widget>[
-          Icon(selected.icon),
+          Icon(
+            selected.icon,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.75),
+          ),
           Padding(
-            padding: const EdgeInsets.only(left: 16),
+            padding: const EdgeInsets.only(left: 24),
             child: Text(
               selected.label,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.75)),
             ),
           ),
         ],
       ),
-      selectionPadding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 10,
+      selectionPadding: const EdgeInsets.only(
+        top: 12,
+        bottom: 11,
+        left: 18,
+        right: 10,
       ),
-      itemPadding: const EdgeInsets.symmetric(vertical: 10),
+      itemPadding: const EdgeInsets.symmetric(vertical: 5),
       itemCount: GameType.values.length,
       itemBuilder: (context, index) {
         return Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 5,
+          padding: const EdgeInsets.only(
+            top: 12,
+            bottom: 11,
+            left: 18,
+            right: 10,
           ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
@@ -46,17 +55,20 @@ class GameTypePopup extends StatelessWidget {
           ),
           child: Row(
             children: <Widget>[
-              Icon(GameType.values[index].icon, size: 48),
+              Icon(
+                GameType.values[index].icon,
+                color:
+                    Theme.of(context).colorScheme.onSurface.withOpacity(0.75),
+              ),
               Padding(
-                padding: const EdgeInsets.only(left: 16),
+                padding: const EdgeInsets.only(left: 24),
                 child: Text(
                   GameType.values[index].label,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.7),
-                      ),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.75)),
                 ),
               ),
             ],
