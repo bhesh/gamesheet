@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
 import 'package:gamesheet/common/game.dart';
-import 'package:gamesheet/db/game.dart';
+import 'package:gamesheet/provider/game.dart';
+import 'package:gamesheet/screens/game.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/message.dart';
+import 'package:provider/provider.dart';
 
 class GameList extends StatelessWidget {
   const GameList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<Game>? games = context.watch();
-    return games == null
-        ? SpinKitRing(
-            color: Theme.of(context).colorScheme.primary,
-            size: 50,
-          )
-        : games!.isNotEmpty
-            ? _buildListView(context, games!)
-            : GamesheetMessage('No games');
+    final provider = Provider.of<GameProvider>(context);
+    if (provider.games == null) {
+      provider.fetchGames();
+      return SpinKitRing(
+        color: Theme.of(context).colorScheme.primary,
+        size: 50,
+      );
+    }
+    return provider.games!.isNotEmpty
+        ? _buildListView(context, provider.games!)
+        : GamesheetMessage('No games');
   }
 
   Widget _buildListView(BuildContext context, List<Game> games) {
+    final provider = Provider.of<GameProvider>(context);
     return ListView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -28,18 +34,20 @@ class GameList extends StatelessWidget {
       itemBuilder: (context, index) {
         assert(index < games.length);
         assert(games[index].id != null);
-        final id = "${games[index].id}";
+        final gameId = games[index].id!;
         return Dismissible(
-          key: Key(id),
+          key: ValueKey(gameId),
           direction: DismissDirection.endToStart,
-          onDismissed: (_) => GameDatabase.removeGame(gameId),
+          onDismissed: (_) => provider.removeGame(gameId),
           confirmDismiss: (_) => _confirmDismiss(context),
           background: Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Container(color: Theme.of(context).colorScheme.error),
           ),
           child: GestureDetector(
-            onTap: () => onTap(index),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => GameScreen(games[index])),
+            ),
             child: GamesheetCard(
               child: Row(
                 children: <Widget>[

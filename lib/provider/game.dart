@@ -1,10 +1,27 @@
-import 'package:provider/provider.dart';
+import 'dart:collection';
+import 'package:flutter/material.dart';
+import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/db/game.dart';
 
 class GameProvider extends ChangeNotifier {
-  final List<Games>? _games;
+  List<Game>? _games;
 
-  Future<UnmodifiableListView<Games>> get games async =>
-      UnmodifiableListView(await GameDatabase.getGames());
+  UnmodifiableListView<Game>? get games =>
+      _games == null ? null : UnmodifiableListView(_games!);
+
+  void fetchGames() {
+    GameDatabase.getGames().then((games) {
+      _games = games;
+      notifyListeners();
+    });
+  }
+
+  void createGame(Game game, List<(String, Palette)> players) {
+    GameDatabase.addGame(game, players).then((_) => fetchGames());
+  }
+
+  void removeGame(int gameId) {
+    GameDatabase.removeGame(gameId).then((_) => fetchGames());
+  }
 }

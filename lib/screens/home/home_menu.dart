@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gamesheet/provider/game.dart';
 import 'package:gamesheet/screens/settings.dart';
+import 'package:provider/provider.dart';
 
 enum HomeMenuItem {
   settings('Settings');
@@ -10,19 +12,22 @@ enum HomeMenuItem {
 }
 
 class HomeMenuList extends StatelessWidget {
-  final void Function(Widget) onSelected;
-
-  const HomeMenuList({
-    required this.onSelected,
-  });
+  const HomeMenuList({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<GameProvider>(context);
     return PopupMenuButton<HomeMenuItem>(
       onSelected: (item) {
         switch (item) {
           case HomeMenuItem.settings:
-            onSelected(const SettingsScreen());
+            Navigator.of(context)
+                .push(
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            )
+                .then((changed) {
+              if (changed != null && changed) provider.fetchGames();
+            });
         }
       },
       itemBuilder: (_) => HomeMenuItem.values.map((item) {
