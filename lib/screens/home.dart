@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gamesheet/provider/game.dart';
+import 'package:gamesheet/provider/game_list.dart';
 import 'package:gamesheet/screens/creategame.dart';
 import 'package:gamesheet/screens/game.dart';
 import 'package:gamesheet/screens/settings.dart';
@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext _context) {
     return ChangeNotifierProvider(
-      create: (_) => GameProvider(),
+      create: (_) => GameListProvider(),
       builder: (context, _) {
         return Scaffold(
           appBar: AppBar(
@@ -50,7 +50,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _navigate(BuildContext context, Widget Function(BuildContext) builder) {
-    final provider = Provider.of<GameProvider>(context, listen: false);
+    final provider = Provider.of<GameListProvider>(context, listen: false);
     Navigator.of(context)
         .push(MaterialPageRoute(builder: builder))
         .then((changed) {

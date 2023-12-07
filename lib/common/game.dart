@@ -79,7 +79,9 @@ class Game {
     }
   }
 
+  bool get hasBids => type == GameType.wizard;
+
   String get bidText => 'bid';
 
-  String get scoreText => type == GameType.wizard ? 'tricks' : 'score';
+  String get scoreText => hasBids ? 'tricks' : 'score';
 }

@@ -1,27 +1,32 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
-import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/common/player.dart';
 import 'package:gamesheet/db/game.dart';
 
 class GameProvider extends ChangeNotifier {
-  List<Game>? _games;
+  final Game game;
+  List<String>? _roundLabels;
+  List<Player>? _players;
 
-  UnmodifiableListView<Game>? get games =>
-      _games == null ? null : UnmodifiableListView(_games!);
+  GameProvider(this.game) : assert(game.id != null);
 
-  void fetchGames() {
-    GameDatabase.getGames().then((games) {
-      _games = games;
+  UnmodifiableListView<String>? get roundLabels =>
+      _roundLabels == null ? null : UnmodifiableListView(_roundLabels!);
+
+  UnmodifiableListView<Player>? get players =>
+      _players == null ? null : UnmodifiableListView(_players!);
+
+  void initialize() {
+    GameDatabase.getPlayers(game.id!).then((players) {
+      assert(players.isNotEmpty);
+      _roundLabels = game.roundLabels(players.length);
+      _players = players;
       notifyListeners();
     });
   }
 
-  void createGame(Game game, List<(String, Palette)> players) {
-    GameDatabase.addGame(game, players).then((_) => fetchGames());
-  }
-
-  void removeGame(int gameId) {
-    GameDatabase.removeGame(gameId).then((_) => fetchGames());
+  void updatePlayer(Player player) {
+    GameDatabase.updatePlayer(player).then((_) => initialize());
   }
 }

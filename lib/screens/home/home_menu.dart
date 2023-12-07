@@ -19,7 +19,7 @@ class HomeMenuList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<HomeMenuItem>(
-      onSelected: (item) => onSelected != null ? onSelected!(item) : {},
+      onSelected: (item) => onSelected == null ? {} : onSelected!(item),
       itemBuilder: (_) => HomeMenuItem.values.map((item) {
         return PopupMenuItem<HomeMenuItem>(
           value: item,

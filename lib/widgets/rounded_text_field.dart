@@ -34,9 +34,8 @@ class RoundedTextField extends StatelessWidget {
       padding: padding,
       width: size.width * 0.8,
       decoration: BoxDecoration(
-        color: background != null
-            ? background
-            : Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+        color: background ??
+            Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
         borderRadius: BorderRadius.circular(29),
       ),
       child: TextField(
@@ -52,19 +51,19 @@ class RoundedTextField extends StatelessWidget {
             child: icon,
           ),
           suffixIcon: suffixIcon,
-          hintText: errorText == null ? hintText : errorText,
+          hintText: errorText ?? hintText,
           counterText: "",
           border: InputBorder.none,
           hintStyle: errorText == null
               ? hintStyle
-              : hintStyle == null
-                  ? TextStyle(
+              : hintStyle?.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .error
+                          .withOpacity(0.7)) ??
+                  TextStyle(
                       color:
-                          Theme.of(context).colorScheme.error.withOpacity(0.7))
-                  : hintStyle!.copyWith(
-                      color:
-                          Theme.of(context).colorScheme.error.withOpacity(0.7),
-                    ),
+                          Theme.of(context).colorScheme.error.withOpacity(0.7)),
         ),
       ),
     );

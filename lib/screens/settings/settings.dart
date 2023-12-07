@@ -14,12 +14,11 @@ class SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var _headerStyle = headerStyle == null
-        ? Theme.of(context)
+    var _headerStyle = headerStyle ??
+        Theme.of(context)
             .textTheme
             .titleMedium
-            ?.copyWith(color: Theme.of(context).colorScheme.primary)
-        : headerStyle!;
+            ?.copyWith(color: Theme.of(context).colorScheme.primary);
     List<Widget> widgets = [
       Padding(
         padding: const EdgeInsets.only(

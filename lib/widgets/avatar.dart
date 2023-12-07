@@ -22,6 +22,7 @@ class GamesheetAvatar extends StatelessWidget {
     var foregroundColor = backgroundColor.isDark ? Colors.white : Colors.black;
     return CircleAvatar(
       backgroundColor: backgroundColor.background,
+      radius: 20,
       child: Text(
         name.substring(0, 1),
         style: Theme.of(context)

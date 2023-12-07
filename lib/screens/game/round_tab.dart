@@ -1,59 +1,90 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
+import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/common/player.dart';
+import 'package:gamesheet/common/round.dart';
+import 'package:gamesheet/provider/round.dart';
+import 'package:gamesheet/provider/score.dart';
 import 'package:gamesheet/widgets/avatar.dart';
 import 'package:gamesheet/widgets/card.dart';
-import './round_controller.dart';
+import 'package:provider/provider.dart';
 
-class RoundTab extends StatelessWidget {
-  final List<Player>? players;
-  final List<RoundController?>? controllers;
-  final bool hasBids;
-  final void Function(int)? onScoreChange;
-  final String? bidText;
-  final String? scoreText;
+class RoundTab extends StatefulWidget {
+  final Game game;
+  final List<Player> players;
+  final int index;
 
   const RoundTab({
-    this.players,
-    this.controllers,
-    this.hasBids = false,
-    this.onScoreChange,
-    this.bidText,
-    this.scoreText,
+    super.key,
+    required this.game,
+    required this.players,
+    required this.index,
   });
 
   @override
-  Widget build(BuildContext context) {
-    // Still loading players
-    if (players == null) {
-      return SliverList.list(
-        children: [
-          SpinKitRing(
-            color: Theme.of(context).colorScheme.primary,
-            size: 50,
-          ),
-        ],
-      );
-    }
+  State<RoundTab> createState() => _RoundTabState();
+}
 
-    // players != null
-    return SliverList.builder(
-      itemCount: players!.length,
-      itemBuilder: (context, index) {
-        // Get player
-        assert(index < players!.length); // do not remove
-        Player player = players![index];
+class _RoundTabState extends State<RoundTab> {
+  Map<int, Round>? _round;
 
-        //Get controller, if available
-        RoundController? roundController = null;
-        if (controllers != null) {
-          // `players.length == controllers.length` so this implies `index < controllers.length`
-          assert(players!.length == controllers!.length);
-          roundController = controllers![index];
+  late final List<TextEditingController>? _bidControllers;
+  late final List<TextEditingController> _scoreControllers;
+
+  @override
+  void dispose() {
+    _bidControllers?.forEach((controller) => controller.dispose());
+    _scoreControllers.forEach((controller) => controller.dispose());
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _bidControllers = widget.game.hasBids
+        ? List.generate(widget.players.length, (_) => TextEditingController())
+        : null;
+    _scoreControllers = List.generate(
+      widget.players.length,
+      (_) => TextEditingController(),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final roundProvider = Provider.of<RoundProvider>(context);
+    _round = roundProvider.round;
+    if (_round == null) {
+      roundProvider.initialize();
+    } else {
+      // Initialize the text fields
+      for (int i = 0; i < widget.players.length; ++i) {
+        Player player = widget.players[i];
+        assert(player.id != null);
+        int? bid = _round![player.id!]?.bid;
+        int? score = _round![player.id!]?.score;
+        if (_bidControllers != null && bid != null && bid! != -1) {
+          _bidControllers![i].text = '$bid';
         }
+        if (score != null && score! != -1) {
+          _scoreControllers[i].text = '$score';
+        }
+      }
+    }
+  }
 
-        // Make children
+  @override
+  Widget build(BuildContext context) {
+    final roundProvider = Provider.of<RoundProvider>(context);
+    return SliverList.builder(
+      itemCount: widget.players.length,
+      itemBuilder: (context, index) {
+        assert(index < widget.players.length);
+        Player player = widget.players[index];
+
+        // Add the player avatar and name
         List<Widget> children = [
           GamesheetAvatar(
             name: player.name,
@@ -61,7 +92,7 @@ class RoundTab extends StatelessWidget {
           ),
           Padding(padding: const EdgeInsets.only(right: 16)),
           Container(
-            width: hasBids ? 100 : 186,
+            width: widget.game.hasBids ? 100 : 186,
             child: Text(
               player.name,
               style: Theme.of(context).textTheme.titleMedium,
@@ -72,7 +103,7 @@ class RoundTab extends StatelessWidget {
         ];
 
         // Add a bid input field if the game has bids
-        if (hasBids) {
+        if (widget.game.hasBids) {
           children.add(
             Padding(
               padding: const EdgeInsets.only(right: 16),
@@ -80,11 +111,11 @@ class RoundTab extends StatelessWidget {
                 width: 70,
                 child: Focus(
                   child: TextField(
-                    controller: roundController?.bidController,
+                    controller: _bidControllers![index],
                     maxLength: 4,
                     decoration: InputDecoration(
                       border: const OutlineInputBorder(),
-                      labelText: bidText ?? 'Bid',
+                      labelText: widget.game.bidText,
                       counterText: "",
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 0,
@@ -97,11 +128,20 @@ class RoundTab extends StatelessWidget {
                     ],
                   ),
                   onFocusChange: (hasFocus) {
-                    if (roundController != null && !hasFocus) {
-                      roundController!.updateBid().then((changed) {
-                        if (onScoreChange != null && changed)
-                          onScoreChange!(index);
-                      });
+                    if (!hasFocus) {
+                      String bidText = _bidControllers![index].text.trim();
+                      int bid = bidText.isEmpty ? -1 : int.parse(bidText);
+                      Player player = widget.players[index];
+                      assert(player.id != null);
+                      Round? newRound =
+                          roundProvider.updateBid(player.id!, bid);
+                      if (newRound != null) {
+                        final scoreProvider = Provider.of<ScoreProvider>(
+                          context,
+                          listen: false,
+                        );
+                        scoreProvider.updateScore(newRound!);
+                      }
                     }
                   },
                 ),
@@ -116,11 +156,11 @@ class RoundTab extends StatelessWidget {
             width: 70,
             child: Focus(
               child: TextField(
-                controller: roundController?.scoreController,
+                controller: _scoreControllers![index],
                 maxLength: 4,
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
-                  labelText: scoreText ?? 'Score',
+                  labelText: widget.game.scoreText,
                   counterText: "",
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 0,
@@ -133,10 +173,20 @@ class RoundTab extends StatelessWidget {
                 ],
               ),
               onFocusChange: (hasFocus) {
-                if (roundController != null && !hasFocus) {
-                  roundController!.updateScore().then((changed) {
-                    if (onScoreChange != null && changed) onScoreChange!(index);
-                  });
+                if (!hasFocus) {
+                  String scoreText = _scoreControllers[index].text.trim();
+                  int score = scoreText.isEmpty ? -1 : int.parse(scoreText);
+                  Player player = widget.players[index];
+                  assert(player.id != null);
+                  Round? newRound =
+                      roundProvider.updateScore(player.id!, score);
+                  if (newRound != null) {
+                    final scoreProvider = Provider.of<ScoreProvider>(
+                      context,
+                      listen: false,
+                    );
+                    scoreProvider.updateScore(newRound!);
+                  }
                 }
               },
             ),

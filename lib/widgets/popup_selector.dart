@@ -32,9 +32,8 @@ class PopupSelector extends StatelessWidget {
         padding: selectionPadding,
         width: size.width * 0.8,
         decoration: BoxDecoration(
-          color: background != null
-              ? background
-              : Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+          color: background ??
+              Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
           borderRadius: BorderRadius.circular(29),
         ),
         child: initialSelection,

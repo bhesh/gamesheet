@@ -33,7 +33,7 @@ class PlayerTextFields extends StatelessWidget {
         controllers.isNotEmpty
             ? _buildListView(context)
             : Text(
-                errorText == null ? 'Add players' : errorText!,
+                errorText ?? 'Add players',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: errorText == null
                           ? Theme.of(context)

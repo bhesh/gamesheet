@@ -1,41 +1,153 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
+import 'package:gamesheet/common/color.dart';
+import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/common/player.dart';
+import 'package:gamesheet/provider/game.dart';
+import 'package:gamesheet/provider/round.dart';
+import 'package:gamesheet/provider/score.dart';
+import 'package:gamesheet/provider/summary.dart';
+import 'package:provider/provider.dart';
+import './overview_tab.dart';
+import './round_tab.dart';
 
-class GameScaffold extends StatelessWidget {
-  final String title;
-  final int numTabs;
-  final Tab Function(BuildContext, int) headerBuilder;
-  final Widget Function(BuildContext, int) pageBuilder;
-  final TabController controller;
+class GameScaffold extends StatefulWidget {
+  final Game game;
 
   const GameScaffold({
     super.key,
-    required this.title,
-    int? numTabs,
-    required this.headerBuilder,
-    required this.pageBuilder,
-    required this.controller,
-  }) : this.numTabs = numTabs ?? 1;
+    required this.game,
+  });
+
+  @override
+  State<GameScaffold> createState() => _GameScaffoldState();
+}
+
+class _GameScaffoldState extends State<GameScaffold>
+    with SingleTickerProviderStateMixin {
+  List<String>? _roundLabels;
+  List<Player>? _players;
+  TabController? _tabController;
+  List<Player>? _winners;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _tabController?.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final gameProvider = Provider.of<GameProvider>(context);
+    _roundLabels = gameProvider.roundLabels;
+    _players = gameProvider.players;
+    if (_roundLabels == null || _players == null) {
+      gameProvider.initialize();
+    } else {
+      if (_tabController == null) {
+        _tabController = TabController(
+          vsync: this,
+          length: _roundLabels!.length + 1,
+        );
+      }
+      final scoreProvider = Provider.of<ScoreProvider>(context);
+      _winners = scoreProvider.winners;
+      if (_winners == null) scoreProvider.initialize();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    return _roundLabels == null || _players == null
+        ? _buildLoading(context)
+        : _buildTabs(context);
+  }
+
+  Widget _buildLoading(BuildContext context) {
     return NestedScrollView(
       headerSliverBuilder: (context, isScrolled) {
         return <Widget>[
           SliverOverlapAbsorber(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
             sliver: SliverAppBar(
-              title: Text(title),
+              title: Text(widget.game.name),
               expandedHeight: 200,
               pinned: true,
               floating: false,
-              bottom: TabBar(
-                controller: controller,
-                isScrollable: true,
-                tabs: List.generate(
-                  numTabs,
-                  (index) => headerBuilder(context, index),
+            ),
+          ),
+        ];
+      },
+      body: Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: SpinKitRing(
+            color: Theme.of(context).colorScheme.primary,
+            size: 50,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabs(BuildContext context) {
+    int numTabs = _roundLabels!.length + 1;
+    return NestedScrollView(
+      headerSliverBuilder: (context, isScrolled) {
+        var tabBar = TabBar(
+          controller: _tabController!,
+          isScrollable: true,
+          tabs: List.generate(numTabs, (index) {
+            if (index == 0) {
+              return Tab(
+                child: Text(
+                  'Overview',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary),
+                ),
+              );
+            }
+            int round = index - 1;
+            return Tab(
+              child: Container(
+                constraints: BoxConstraints(
+                  minWidth: 12,
+                ),
+                child: Text(
+                  '${_roundLabels![round]}',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary),
                 ),
               ),
+            );
+          }),
+        );
+        return <Widget>[
+          SliverOverlapAbsorber(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            sliver: SliverAppBar(
+              title: Text(widget.game.name),
+              expandedHeight: 200,
+              pinned: true,
+              floating: false,
+              flexibleSpace: LayoutBuilder(
+                builder: (context, constraints) {
+                  final scoreProvider = Provider.of<ScoreProvider>(context);
+                  return constraints.biggest.height < 200
+                      ? Container()
+                      : Center(
+                          child: scoreProvider.buildWinnerWidget(
+                            context,
+                            Theme.of(context).colorScheme.onPrimary,
+                            true,
+                          ),
+                        );
+                },
+              ),
+              bottom: tabBar,
             ),
           ),
         ];
@@ -43,7 +155,7 @@ class GameScaffold extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.only(top: 8),
         child: TabBarView(
-          controller: controller,
+          controller: _tabController!,
           children: List.generate(
             numTabs,
             (index) {
@@ -53,7 +165,7 @@ class GameScaffold extends StatelessWidget {
                 child: Builder(
                   builder: (context) {
                     return CustomScrollView(
-                      controller: ScrollController(), // throws error otherwise
+                      controller: ScrollController(),
                       key: PageStorageKey<int>(index),
                       slivers: <Widget>[
                         SliverOverlapInjector(
@@ -61,7 +173,20 @@ class GameScaffold extends StatelessWidget {
                               NestedScrollView.sliverOverlapAbsorberHandleFor(
                                   context),
                         ),
-                        pageBuilder(context, index),
+                        index == 0
+                            ? OverviewTab(
+                                game: widget.game,
+                                players: _players!,
+                              )
+                            : ChangeNotifierProvider(
+                                create: (_) =>
+                                    RoundProvider(widget.game, index - 1),
+                                child: RoundTab(
+                                  game: widget.game,
+                                  players: _players!,
+                                  index: index - 1,
+                                ),
+                              ),
                       ],
                     );
                   },

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
 import 'package:gamesheet/common/game.dart';
-import 'package:gamesheet/provider/game.dart';
+import 'package:gamesheet/provider/game_list.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/message.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +16,7 @@ class GameList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<GameProvider>(context);
+    final provider = Provider.of<GameListProvider>(context);
     if (provider.games == null) {
       provider.fetchGames();
       return SpinKitRing(
@@ -30,7 +30,7 @@ class GameList extends StatelessWidget {
   }
 
   Widget _buildListView(BuildContext context, List<Game> games) {
-    final provider = Provider.of<GameProvider>(context);
+    final provider = Provider.of<GameListProvider>(context);
     return ListView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -49,7 +49,7 @@ class GameList extends StatelessWidget {
             child: Container(color: Theme.of(context).colorScheme.error),
           ),
           child: GestureDetector(
-            onTap: () => onSelected != null ? onSelected!(games[index]) : {},
+            onTap: () => onSelected == null ? {} : onSelected!(games[index]),
             child: GamesheetCard(
               child: Row(
                 children: <Widget>[

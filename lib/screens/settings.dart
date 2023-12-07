@@ -72,8 +72,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SettingsSection(
             header: 'General',
             children: <Widget>[
+              const SettingsField(
+                title: 'About',
+                description: 'Score tracker for a variety of games',
+              ),
               SettingsField(
-                title: 'Train Game',
+                title: 'Train',
                 description:
                     'A standard domino game where the goal to score the least amount of points',
                 onTap: () => launchUrl(trainRules),
@@ -88,10 +92,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: 'Wizard',
                 description: 'A card game with initial bids and tricks',
                 onTap: () => launchUrl(wizardRules),
-              ),
-              const SettingsField(
-                title: 'About',
-                description: 'Score tracker for a variety of games',
               ),
             ],
           ),

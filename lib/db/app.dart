@@ -22,9 +22,7 @@ class AppDatabase {
   }
 
   static Future<Database> get settingsDatabase async =>
-      _settingsDatabase == null
-          ? await _initSettingsDatabase()
-          : _settingsDatabase!;
+      _settingsDatabase ?? await _initSettingsDatabase();
 
   static Future<Database> _initSettingsDatabase() async {
     final Directory directory = await getApplicationSupportDirectory();
@@ -60,7 +58,7 @@ class AppDatabase {
   }
 
   static Future<Database> get gameDatabase async =>
-      _gameDatabase == null ? await _initGameDatabase() : _gameDatabase!;
+      _gameDatabase ?? await _initGameDatabase();
 
   static Future<Database> _initGameDatabase() async {
     final Directory directory = await getApplicationSupportDirectory();
@@ -97,9 +95,9 @@ class AppDatabase {
       '''
       CREATE TABLE players (
           id INTEGER PRIMARY KEY,
+          gameId INTEGER NOT NULL,
           name TEXT NOT NULL,
-          color INTEGER NOT NULL,
-          gameId INTEGER NOT NULL
+          color INTEGER NOT NULL
       )
       ''',
     );
@@ -107,12 +105,12 @@ class AppDatabase {
     batch.execute(
       '''
       CREATE TABLE rounds (
-          id INTEGER PRIMARY KEY,
           gameId INTEGER NOT NULL,
           playerId INTEGER NOT NULL,
           round INTEGER NOT NULL,
           bid INTEGER NOT NULL,
           score INTEGER NOT NULL,
+          UNIQUE(gameId, playerId, round) ON CONFLICT REPLACE
       )
       ''',
     );

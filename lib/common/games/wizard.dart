@@ -1,13 +1,12 @@
-import 'package:gamesheet/common/player.dart';
 import 'package:gamesheet/common/round.dart';
-import './game_player.dart';
+import './score.dart';
 
-class WizardPlayer extends GamePlayer {
+class WizardScore extends Score {
   final List<int> scores;
 
-  WizardPlayer(Player player, int numRounds)
+  WizardScore(int numRounds)
       : scores = List.generate(numRounds, (_) => 0),
-        super(player, numRounds);
+        super(numRounds);
 
   @override
   void setRound(Round round) {

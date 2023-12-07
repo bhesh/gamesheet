@@ -26,20 +26,7 @@ class GameDatabase {
         Player(name: name, color: color, gameId: gameId).toMap(),
       );
     });
-    List<dynamic> results = await batch.commit();
-    batch = database.batch();
-    results.forEach((playerId) {
-      for (int i = 0; i < game.numRounds(players.length); ++i)
-        batch.insert(
-          'rounds',
-          Round(
-            gameId: gameId,
-            playerId: playerId,
-            round: i,
-          ).toMap(),
-        );
-    });
-    await batch.commit();
+    await batch.commit(noResult: true);
     return gameId;
   }
 
@@ -68,12 +55,11 @@ class GameDatabase {
   static Future updatePlayer(Player player) async {
     assert(player.id != null);
     var database = await AppDatabase.gameDatabase;
-    var map = player.toMap();
     await database.update(
       'players',
-      {'name': map['name'], 'color': map['color']},
+      {'name': player.name, 'color': player.color},
       where: 'id = ?',
-      whereArgs: [map['id']],
+      whereArgs: [player.id!],
     );
   }
 
@@ -101,14 +87,7 @@ class GameDatabase {
   }
 
   static Future updateRound(Round round) async {
-    assert(round.id != null);
     var database = await AppDatabase.gameDatabase;
-    var map = round.toMap();
-    await database.update(
-      'rounds',
-      {'bid': map['bid'], 'score': map['score']},
-      where: 'id = ?',
-      whereArgs: [map['id']],
-    );
+    await database.insert('rounds', round.toMap());
   }
 }

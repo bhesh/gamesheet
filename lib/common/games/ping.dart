@@ -1,13 +1,12 @@
-import 'package:gamesheet/common/player.dart';
 import 'package:gamesheet/common/round.dart';
-import './game_player.dart';
+import './score.dart';
 
-class PingPlayer extends GamePlayer {
+class PingScore extends Score {
   final List<int> scores;
 
-  PingPlayer(Player player, int numRounds)
+  PingScore(int numRounds)
       : scores = List.generate(numRounds, (_) => 0),
-        super(player, numRounds);
+        super(numRounds);
 
   @override
   void setRound(Round round) {
