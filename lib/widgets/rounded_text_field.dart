@@ -42,6 +42,7 @@ class RoundedTextField extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         cursorColor: cursorColor,
+        textCapitalization: TextCapitalization.words,
         maxLength: maxLength,
         decoration: InputDecoration(
           icon: Container(

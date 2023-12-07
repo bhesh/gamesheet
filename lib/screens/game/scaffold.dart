@@ -138,7 +138,8 @@ class _GameScaffoldState extends State<GameScaffold>
                   final scoreProvider = Provider.of<ScoreProvider>(context);
                   return constraints.biggest.height < 200
                       ? Container()
-                      : Center(
+                      : Padding(
+                          padding: EdgeInsets.only(top: constraints.biggest.height - 120),
                           child: scoreProvider.buildWinnerWidget(
                             context,
                             Theme.of(context).colorScheme.onPrimary,
