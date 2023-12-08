@@ -63,9 +63,13 @@ class ScoreBar extends StatelessWidget {
                 ),
                 child: Row(
                   children: <Widget>[
-                    Text(
-                      '${name}',
-                      style: Theme.of(context).textTheme.labelLarge,
+                    Container(
+                      width: width * 0.75,
+                      child: Text(
+                        '${name}',
+                        style: Theme.of(context).textTheme.labelLarge,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     const Spacer(),
                     Text(
