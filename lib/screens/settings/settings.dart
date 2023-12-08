@@ -33,16 +33,7 @@ class SettingsSection extends StatelessWidget {
         ),
       ),
     ];
-    for (int i = 0; i < children.length; ++i)
-      widgets.add(Padding(
-        padding: const EdgeInsets.only(
-          top: 16,
-          bottom: 16,
-          left: 48,
-          right: 16,
-        ),
-        child: children[i],
-      ));
+    for (int i = 0; i < children.length; ++i) widgets.add(children[i]);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: widgets,
@@ -80,10 +71,17 @@ class SettingsField extends StatelessWidget {
       Spacer(),
     ];
     if (suffixWidget != null) children.add(suffixWidget!);
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
+    return InkWell(
       onTap: onTap,
-      child: Row(children: children),
+      child: Padding(
+        padding: const EdgeInsets.only(
+          top: 16,
+          bottom: 16,
+          left: 48,
+          right: 16,
+        ),
+        child: Row(children: children),
+      ),
     );
   }
 }

@@ -52,10 +52,6 @@ class BarGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: _buildChildren(context));
-  }
-
-  List<Widget> _buildChildren(BuildContext context) {
     List<Widget> children = List.empty(growable: true);
     for (int i = 0; i < players.length; ++i) {
       Player player = players[i];
@@ -90,6 +86,6 @@ class BarGraph extends StatelessWidget {
           ));
       }
     }
-    return children;
+    return Column(children: children);
   }
 }

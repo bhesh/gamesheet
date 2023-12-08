@@ -25,8 +25,8 @@ class PopupSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     TextStyle? hintStyle = Theme.of(context).inputDecorationTheme?.hintStyle;
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
+    return InkWell(
+      borderRadius: BorderRadius.circular(29),
       onTap: () => _selectPopup(context),
       child: Container(
         padding: selectionPadding,

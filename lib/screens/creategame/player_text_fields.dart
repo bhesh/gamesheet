@@ -28,55 +28,45 @@ class PlayerTextFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        controllers.isNotEmpty
-            ? _buildListView(context)
-            : Text(
-                errorText ?? 'Add players',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: errorText == null
-                          ? Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withOpacity(0.7)
-                          : Theme.of(context)
-                              .colorScheme
-                              .error
-                              .withOpacity(0.7),
-                    ),
-              ),
-        Padding(padding: const EdgeInsets.symmetric(vertical: 8)),
-        IconButton(
-          icon: const Icon(Symbols.person_add),
-          color: Theme.of(context).colorScheme.primary,
-          tooltip: 'Add Player Field',
-          onPressed: controllers.length >= maxNumPlayers ? null : onAdd,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildListView(BuildContext context) {
-    return ListView.separated(
-      scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      itemCount: controllers.length > maxNumPlayers
-          ? maxNumPlayers
-          : controllers.length,
-      itemBuilder: (context, index) {
-        return PlayerInput(
-          controller: controllers[index],
+    List<Widget> children = List.empty(growable: true);
+    for (int i = 0; i < controllers.length; ++i) {
+      children.add(Padding(
+        padding: EdgeInsets.only(bottom: 16),
+        child: PlayerInput(
+          controller: controllers[i],
           maxNameLength: maxNameLength,
           hintText: hintText,
           errorText: errorText,
           onColorChange: (color) =>
-              onColorChange == null ? {} : onColorChange!(index, color),
-          onDelete: () => onDelete == null ? {} : onDelete!(index),
-        );
-      },
-      separatorBuilder: (context, index) =>
-          Padding(padding: const EdgeInsets.symmetric(vertical: 8)),
+              onColorChange == null ? {} : onColorChange!(i, color),
+          onDelete: () => onDelete == null ? {} : onDelete!(i),
+        ),
+      ));
+    }
+    if (children.isEmpty) {
+      children.add(Padding(
+        padding: EdgeInsets.only(bottom: 16),
+        child: Center(
+          child: Text(
+            errorText ?? 'Add players',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: errorText == null
+                      ? Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
+                      : Theme.of(context).colorScheme.error.withOpacity(0.7),
+                ),
+          ),
+        ),
+      ));
+    }
+    children.add(IconButton(
+      icon: const Icon(Symbols.person_add),
+      color: Theme.of(context).colorScheme.primary,
+      tooltip: 'Add Player Field',
+      onPressed: controllers.length >= maxNumPlayers ? null : onAdd,
+    ));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
     );
   }
 }

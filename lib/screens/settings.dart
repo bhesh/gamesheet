@@ -154,7 +154,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Palette color = Palette.values[index ~/ 2];
               bool isDark = index % 2 == 1;
               ThemeData themeData = buildTheme(color.background, isDark);
-              return GestureDetector(
+              return InkWell(
+                borderRadius: BorderRadius.circular(15),
+                onTap: () {
+                  theme.updateTheme(color, isDark);
+                  _saveTheme(color, isDark);
+                  Navigator.of(context).pop();
+                },
                 child: Container(
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
@@ -182,11 +188,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                 ),
-                onTap: () {
-                  theme.updateTheme(color, isDark);
-                  _saveTheme(color, isDark);
-                  Navigator.of(context).pop();
-                },
               );
             },
           ),

@@ -24,20 +24,21 @@ class PlayerInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RoundedTextField(
-      //padding: const EdgeInsets.only(left: 15, right: 10),
       controller: controller.textController,
       maxLength: maxNameLength,
       hintText: hintText,
       errorText: errorText,
-      icon: GestureDetector(
-        child: Container(
-          decoration: BoxDecoration(
-            color: controller.color.background,
-            borderRadius: BorderRadius.circular(30),
+      icon: InkWell(
+        borderRadius: BorderRadius.circular(30),
+        onTap: () => _colorChooser(context),
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: controller.color.background,
+              borderRadius: BorderRadius.circular(30),
+            ),
           ),
-        ),
-        onTap: () => _colorChooser(
-          context,
         ),
       ),
       suffixIcon: IconButton(

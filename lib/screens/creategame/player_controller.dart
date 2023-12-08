@@ -23,10 +23,6 @@ class PlayerController {
 
   String get text => textController.text;
 
-  void setColor(Palette newColor) {
-    color = newColor;
-  }
-
   void randomColor() {
     color = Palette.random;
   }

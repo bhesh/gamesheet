@@ -44,16 +44,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Create Game'),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Symbols.add_box),
-            tooltip: 'Create Game',
-            onPressed: () => _createGame(context),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text('Create Game')),
       body: Padding(
         padding: const EdgeInsets.only(top: 8),
         child: ListView(
@@ -89,11 +80,44 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                   _playerControllers.add(PlayerController.random());
                 }),
                 onColorChange: (index, color) => setState(
-                  () => _playerControllers[index].setColor(color),
+                  () => _playerControllers[index].color = color,
                 ),
                 onDelete: (index) => setState(() {
                   _playerControllers.removeAt(index).dispose();
                 }),
+              ),
+            ),
+            GamesheetCard(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(29),
+                onTap: () => _createGame(context),
+                child: Container(
+                  padding: const EdgeInsets.only(
+                    top: 12,
+                    bottom: 11,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(29),
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      Spacer(),
+                      Text(
+                        'Create Game',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary),
+                      ),
+                      Spacer(),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
