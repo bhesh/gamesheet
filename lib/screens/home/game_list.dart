@@ -11,10 +11,12 @@ final DateFormat dateFormatter = DateFormat.yMMMd().add_jm();
 
 class GameList extends StatelessWidget {
   final void Function(Game game)? onSelected;
+  final String? filter;
 
   const GameList({
     super.key,
     this.onSelected,
+    this.filter,
   });
 
   @override
@@ -28,8 +30,17 @@ class GameList extends StatelessWidget {
       );
     }
     return provider.games!.isNotEmpty
-        ? _buildListView(context, provider.games!)
+        ? _buildListView(context, _filtered(provider.games!))
         : GamesheetMessage('No games');
+  }
+
+  List<Game> _filtered(List<Game> gameList) {
+    if (filter == null) return gameList;
+    return gameList.where(
+      (game) {
+        return game.name.toLowerCase().contains(filter!.toLowerCase());
+      },
+    ).toList();
   }
 
   Widget _buildListView(BuildContext context, List<Game> games) {

@@ -11,6 +11,7 @@ class PlayerInput extends StatelessWidget {
   final String? errorText;
   final void Function(Palette)? onColorChange;
   final void Function()? onDelete;
+  final ValueChanged<String>? onSubmitted;
 
   const PlayerInput({
     required this.controller,
@@ -19,15 +20,18 @@ class PlayerInput extends StatelessWidget {
     this.errorText,
     this.onColorChange,
     this.onDelete,
+    this.onSubmitted,
   });
 
   @override
   Widget build(BuildContext context) {
     return RoundedTextField(
       controller: controller.textController,
+      focusNode: controller.focusNode,
       maxLength: maxNameLength,
       hintText: hintText,
       errorText: errorText,
+      onSubmitted: onSubmitted,
       icon: InkWell(
         borderRadius: BorderRadius.circular(30),
         onTap: () => _colorChooser(context),

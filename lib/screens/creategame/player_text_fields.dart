@@ -40,6 +40,11 @@ class PlayerTextFields extends StatelessWidget {
           onColorChange: (color) =>
               onColorChange == null ? {} : onColorChange!(i, color),
           onDelete: () => onDelete == null ? {} : onDelete!(i),
+          onSubmitted: (_) {
+            int nextIndex = i + 1;
+            if (nextIndex < controllers.length)
+              controllers[nextIndex].focusNode.requestFocus();
+          },
         ),
       ));
     }

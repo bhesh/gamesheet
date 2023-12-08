@@ -6,7 +6,9 @@ class RoundedTextField extends StatelessWidget {
   final Widget? icon;
   final Widget? suffixIcon;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final Color? cursorColor;
   final Color? background;
   final EdgeInsetsGeometry padding;
@@ -19,7 +21,9 @@ class RoundedTextField extends StatelessWidget {
     this.icon,
     this.suffixIcon,
     this.onChanged,
+    this.onSubmitted,
     this.controller,
+    this.focusNode,
     this.cursorColor,
     this.background,
     this.padding = const EdgeInsets.symmetric(horizontal: 10),
@@ -40,7 +44,9 @@ class RoundedTextField extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
         onChanged: onChanged,
+        onSubmitted: onSubmitted,
         cursorColor: cursorColor,
         textCapitalization: TextCapitalization.words,
         maxLength: maxLength,
