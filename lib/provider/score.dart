@@ -57,13 +57,19 @@ class ScoreProvider extends ChangeNotifier {
       _winners == null ? null : UnmodifiableListView(_winners!);
 
   void initialize() {
-    GameDatabase.getRounds(game.id!).then((rounds) {
+    Future(() async {
+      final numRounds = game.numRounds(players.length);
+      var rounds = await GameDatabase.getRounds(game.id!);
+      List<int> numComplete = List.filled(numRounds, 0);
       rounds.forEach((round) {
         assert(_scores.containsKey(round.playerId));
+        assert(round.round < numRounds);
         _scores[round.playerId]!.setRound(round);
+        numComplete[round.round] += 1;
       });
-      _updateWinners();
-    });
+      for (int i = 0; i < numRounds; ++i)
+        _isComplete[i] = numComplete[i] == players.length;
+    }).then((_) => _updateWinners());
   }
 
   void updateScore(Round round) {
