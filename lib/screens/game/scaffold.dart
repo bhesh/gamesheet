@@ -111,6 +111,8 @@ class _GameScaffoldState extends State<GameScaffold>
               );
             }
             int round = index - 1;
+            final isComplete =
+                Provider.of<ScoreProvider>(context).isComplete(round);
             return Tab(
               child: Container(
                 constraints: BoxConstraints(
@@ -119,7 +121,12 @@ class _GameScaffoldState extends State<GameScaffold>
                 child: Text(
                   '${_roundLabels![round]}',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary),
+                      color: isComplete
+                          ? Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withOpacity(0.5)
+                          : Theme.of(context).colorScheme.onPrimary),
                 ),
               ),
             );
@@ -139,7 +146,8 @@ class _GameScaffoldState extends State<GameScaffold>
                   return constraints.biggest.height < 200
                       ? Container()
                       : Padding(
-                          padding: EdgeInsets.only(top: constraints.biggest.height - 120),
+                          padding: EdgeInsets.only(
+                              top: constraints.biggest.height - 120),
                           child: scoreProvider.buildWinnerWidget(
                             context,
                             Theme.of(context).colorScheme.onPrimary,

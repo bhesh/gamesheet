@@ -28,6 +28,7 @@ class RoundTab extends StatefulWidget {
 
 class _RoundTabState extends State<RoundTab> {
   Map<int, Round>? _round;
+  bool _isComplete = false;
 
   late final List<TextEditingController>? _bidControllers;
   late final List<TextEditingController> _scoreControllers;
@@ -72,6 +73,7 @@ class _RoundTabState extends State<RoundTab> {
           _scoreControllers[i].text = '$score';
         }
       }
+      _checkIfComplete();
     }
   }
 
@@ -141,6 +143,7 @@ class _RoundTabState extends State<RoundTab> {
                           listen: false,
                         );
                         scoreProvider.updateScore(newRound!);
+                        _checkIfComplete();
                       }
                     }
                   },
@@ -186,6 +189,7 @@ class _RoundTabState extends State<RoundTab> {
                       listen: false,
                     );
                     scoreProvider.updateScore(newRound!);
+                    _checkIfComplete();
                   }
                 }
               },
@@ -200,5 +204,23 @@ class _RoundTabState extends State<RoundTab> {
         );
       },
     );
+  }
+
+  void _checkIfComplete() {
+    final scoreProvider = Provider.of<ScoreProvider>(context, listen: false);
+    Future<bool>(() {
+      bool isComplete = true;
+      if (widget.game.hasBids && _bidControllers != null)
+        _bidControllers.forEach((controller) =>
+            isComplete = isComplete && controller.text.isNotEmpty);
+      _scoreControllers.forEach((controller) =>
+          isComplete = isComplete && controller.text.isNotEmpty);
+      return isComplete;
+    }).then((result) {
+      if (_isComplete != result) {
+        setState(() => _isComplete = result);
+        scoreProvider.updateRound(widget.index, result);
+      }
+    });
   }
 }

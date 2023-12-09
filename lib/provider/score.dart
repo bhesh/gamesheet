@@ -10,7 +10,7 @@ import 'package:gamesheet/common/round.dart';
 import 'package:gamesheet/db/game.dart';
 import 'package:gamesheet/widgets/avatar.dart';
 
-HashMap<int, Score> _buildScores(Game game, List<Player> players) {
+HashMap<int, Score> _initScores(Game game, List<Player> players) {
   HashMap<int, Score> scores = HashMap();
   final numRounds = game.numRounds(players.length);
   switch (game.type) {
@@ -33,17 +33,25 @@ HashMap<int, Score> _buildScores(Game game, List<Player> players) {
   return scores;
 }
 
+List<bool> _initComplete(Game game, List<Player> players) {
+  return List.filled(game.numRounds(players.length), false);
+}
+
 class ScoreProvider extends ChangeNotifier {
   final Game game;
   final List<Player> players;
   final HashMap<int, Score> _scores;
+  final List<bool> _isComplete;
   List<Player>? _winners;
 
   ScoreProvider(this.game, this.players)
       : assert(game.id != null),
-        this._scores = _buildScores(game, players);
+        this._scores = _initScores(game, players),
+        this._isComplete = _initComplete(game, players);
 
   UnmodifiableMapView<int, Score> get scores => UnmodifiableMapView(_scores);
+
+  UnmodifiableListView<bool> get complete => UnmodifiableListView(_isComplete);
 
   UnmodifiableListView<Player>? get winners =>
       _winners == null ? null : UnmodifiableListView(_winners!);
@@ -62,6 +70,17 @@ class ScoreProvider extends ChangeNotifier {
     assert(_scores.containsKey(round.playerId));
     _scores[round.playerId]!.setRound(round);
     _updateWinners();
+  }
+
+  void updateRound(int round, bool isComplete) {
+    assert(round < _isComplete.length);
+    _isComplete[round] = isComplete;
+    notifyListeners();
+  }
+
+  bool isComplete(int round) {
+    assert(round < _isComplete.length);
+    return _isComplete[round];
   }
 
   Widget buildWinnerWidget(BuildContext context, Color textColor,
