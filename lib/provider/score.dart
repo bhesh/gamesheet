@@ -69,7 +69,8 @@ class ScoreProvider extends ChangeNotifier {
       });
       for (int i = 0; i < numRounds; ++i)
         _isComplete[i] = numComplete[i] == players.length;
-    }).then((_) => _updateWinners());
+      _winners = await _calculate();
+    }).then((_) => notifyListeners());
   }
 
   void updateScore(Round round) {
