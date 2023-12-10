@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/color.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import './player_controller.dart';
 import './player_input.dart';
 
 class PlayerTextFields extends StatelessWidget {
@@ -31,7 +30,7 @@ class PlayerTextFields extends StatelessWidget {
     List<Widget> children = List.empty(growable: true);
     for (int i = 0; i < controllers.length; ++i) {
       children.add(Padding(
-        padding: EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.only(bottom: 16),
         child: PlayerInput(
           controller: controllers[i],
           maxNameLength: maxNameLength,
@@ -50,7 +49,7 @@ class PlayerTextFields extends StatelessWidget {
     }
     if (children.isEmpty) {
       children.add(Padding(
-        padding: EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.only(bottom: 16),
         child: Center(
           child: Text(
             errorText ?? 'Add players',

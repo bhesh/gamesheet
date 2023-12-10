@@ -1,8 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/color.dart';
-import 'package:gamesheet/widgets/rounded_text_field.dart';
+import 'package:gamesheet/widgets/newgame/rounded_text_field.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import './player_controller.dart';
+
+class PlayerController {
+  final TextEditingController textController;
+  final FocusNode focusNode;
+  Palette color;
+
+  PlayerController()
+      : this.textController = TextEditingController(),
+        this.focusNode = FocusNode(),
+        this.color = Palette.red;
+
+  PlayerController.withColor(this.color)
+      : this.textController = TextEditingController(),
+        this.focusNode = FocusNode();
+
+  PlayerController.random()
+      : this.textController = TextEditingController(),
+        this.focusNode = FocusNode(),
+        this.color = Palette.random;
+
+  @override
+  void dispose() {
+    textController.dispose();
+    focusNode.dispose();
+  }
+
+  String get text => textController.text;
+
+  void randomColor() {
+    color = Palette.random;
+  }
+}
 
 class PlayerInput extends StatelessWidget {
   final PlayerController controller;

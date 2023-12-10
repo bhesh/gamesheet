@@ -9,9 +9,6 @@ class RoundedTextField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final TextEditingController? controller;
   final FocusNode? focusNode;
-  final Color? cursorColor;
-  final Color? background;
-  final EdgeInsetsGeometry padding;
   final int maxLength;
 
   const RoundedTextField({
@@ -24,9 +21,6 @@ class RoundedTextField extends StatelessWidget {
     this.onSubmitted,
     this.controller,
     this.focusNode,
-    this.cursorColor,
-    this.background,
-    this.padding = const EdgeInsets.symmetric(horizontal: 10),
     this.maxLength = 40,
   });
 
@@ -35,11 +29,10 @@ class RoundedTextField extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     TextStyle? hintStyle = Theme.of(context).inputDecorationTheme.hintStyle;
     return Container(
-      padding: padding,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       width: size.width * 0.8,
       decoration: BoxDecoration(
-        color: background ??
-            Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
         borderRadius: BorderRadius.circular(29),
       ),
       child: TextField(
@@ -47,12 +40,11 @@ class RoundedTextField extends StatelessWidget {
         focusNode: focusNode,
         onChanged: onChanged,
         onSubmitted: onSubmitted,
-        cursorColor: cursorColor,
         textCapitalization: TextCapitalization.words,
         maxLength: maxLength,
         decoration: InputDecoration(
           icon: Container(
-            padding: EdgeInsets.all(5),
+            padding: const EdgeInsets.all(5),
             height: 40,
             width: 40,
             child: icon,

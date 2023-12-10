@@ -4,29 +4,26 @@ import 'package:gamesheet/common/settings.dart';
 import 'package:gamesheet/common/themes.dart';
 import 'package:gamesheet/db/app.dart';
 import 'package:gamesheet/db/settings.dart';
-import 'package:gamesheet/widgets/loader.dart';
+import 'package:gamesheet/widgets/dialog.dart';
+import 'package:gamesheet/widgets/settings/section.dart';
+import 'package:gamesheet/widgets/settings/field.dart';
+import 'package:gamesheet/widgets/settings/theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
-import './settings/settings.dart';
 
-final Uri trainRules = Uri.parse(
-  'https://www.ultraboardgames.com/mexican-train/game-rules.php',
-);
-final Uri pingRules = Uri.parse(
-  'https://www.ultraboardgames.com/five-crowns/game-rules.php',
-);
-final Uri wizardRules = Uri.parse(
-  'https://www.ultraboardgames.com/wizard/game-rules.php',
-);
+class SettingsScreen extends StatelessWidget {
+  static final Uri trainRules = Uri.parse(
+    'https://www.ultraboardgames.com/mexican-train/game-rules.php',
+  );
+  static final Uri pingRules = Uri.parse(
+    'https://www.ultraboardgames.com/five-crowns/game-rules.php',
+  );
+  static final Uri wizardRules = Uri.parse(
+    'https://www.ultraboardgames.com/wizard/game-rules.php',
+  );
 
-class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
-  @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Provider.of<ThemeChanger>(context);
@@ -41,30 +38,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: <Widget>[
               SettingsField(
                 title: 'Theme',
-                // Hana for my wife
+                // Named for my wife
                 description: theme.color == Palette.lightPink && theme.isDark
                     ? 'Hana'
                     : (theme.isDark ? 'Dark ' : 'Light ') + theme.color.label,
-                suffixWidget: Container(
-                  height: 40,
-                  width: 40,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: theme.data.colorScheme.background,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Container(
-                      margin: EdgeInsets.all(5),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: theme.data.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                  ),
-                ),
-                onTap: () => _changeTheme(theme),
+                suffixWidget: ThemeDisplay.small(themeData: theme.data),
+                onTap: () => _themePopup(context, theme),
               ),
             ],
           ),
@@ -106,28 +85,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SettingsField(
                 title: 'Delete all games',
                 description: 'Deletes all games',
-                onTap: () {
-                  _confirm(context, 'Do you wish to delete all games?')
-                      .then((confirm) {
-                    if (confirm) {
-                      loaderDialog(context, _deleteAllGames)
-                          .then((_) => Navigator.of(context).pop(true));
-                    }
-                  });
-                },
+                onTap: () => _confirmDelete(
+                  context,
+                  'Do you wish to delete all games?',
+                  _deleteAllGames,
+                ),
               ),
               SettingsField(
                 title: 'Reset all data',
                 description: 'Deletes all data and restores the initial state',
-                onTap: () {
-                  _confirm(context, 'Do you wish to delete all data?')
-                      .then((confirm) {
-                    if (confirm) {
-                      loaderDialog(context, _deleteAllData)
-                          .then((_) => Navigator.of(context).pop(true));
-                    }
-                  });
-                },
+                onTap: () => _confirmDelete(
+                  context,
+                  'Do you wish to delete all data?',
+                  _deleteAllData,
+                ),
               ),
             ],
           ),
@@ -136,12 +107,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _changeTheme(ThemeChanger theme) {
+  void _themePopup(BuildContext context, ThemeChanger theme) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: GridView.builder(
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 175,
@@ -161,32 +132,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _saveTheme(color, isDark);
                   Navigator.of(context).pop();
                 },
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: themeData.colorScheme.background,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Center(
-                    child: Container(
-                      margin: EdgeInsets.all(10),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: themeData.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: Text(
-                        // Hana for my wife
-                        color == Palette.lightPink && isDark
-                            ? 'Hana'
-                            : color.label,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(color: themeData.colorScheme.onPrimary),
-                      ),
-                    ),
-                  ),
+                child: ThemeDisplay.large(
+                  themeData: themeData,
+                  label: color == Palette.lightPink && isDark
+                      ? 'Hana'
+                      : color.label,
                 ),
               );
             },
@@ -196,35 +146,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<bool> _confirm(BuildContext context, String message) async {
-    return await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Confirm'),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              style: ButtonStyle(
-                foregroundColor: MaterialStatePropertyAll<Color>(
-                    Theme.of(context).colorScheme.error),
-              ),
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Future _saveTheme(Palette color, bool isDark) async {
     await SettingsDatabase.updateSetting(Setting.themeColor, color.id);
     await SettingsDatabase.updateSetting(Setting.themeIsDark, isDark ? 1 : 0);
+  }
+
+  void _confirmDelete(
+    BuildContext context,
+    String message,
+    Future Function() action,
+  ) {
+    confirmDeleteDialog(context, message).then((confirm) {
+      if (confirm) {
+        loaderDialog(context, action).then(
+          (_) => Navigator.of(context).pop(true),
+        );
+      }
+    });
   }
 
   Future _deleteAllGames() async {

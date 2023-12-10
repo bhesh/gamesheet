@@ -4,22 +4,23 @@ import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/common/round.dart';
 import 'package:gamesheet/db/game.dart';
 
-class RoundProvider extends ChangeNotifier {
+class RoundModel extends ChangeNotifier {
   final Game game;
   final int index;
   HashMap<int, Round>? _round;
 
-  RoundProvider(this.game, this.index) : assert(game.id != null);
+  RoundModel(this.game, this.index) : assert(game.id != null) {
+    initialize();
+  }
 
   UnmodifiableMapView<int, Round>? get round =>
       _round == null ? null : UnmodifiableMapView(_round!);
 
-  void initialize() {
-    GameDatabase.getRound(game.id!, index).then((rounds) {
-      _round = HashMap();
-      rounds.forEach((round) => _round![round.playerId] = round);
-      notifyListeners();
-    });
+  Future<void> initialize() async {
+    var rounds = await GameDatabase.getRound(game.id!, index);
+    _round = HashMap();
+    rounds.forEach((round) => _round![round.playerId] = round);
+    notifyListeners();
   }
 
   Round? updateBid(int playerId, int bid) {

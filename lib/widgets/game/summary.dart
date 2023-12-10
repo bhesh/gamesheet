@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
 import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/common/games/score.dart';
 import 'package:gamesheet/common/player.dart';
-import 'package:gamesheet/provider/score.dart';
-import 'package:gamesheet/provider/summary.dart';
+import 'package:gamesheet/model/summary.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:provider/provider.dart';
 import './bar_graph.dart';

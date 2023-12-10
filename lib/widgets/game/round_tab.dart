@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
 import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/common/player.dart';
 import 'package:gamesheet/common/round.dart';
-import 'package:gamesheet/provider/round.dart';
-import 'package:gamesheet/provider/score.dart';
+import 'package:gamesheet/model/game.dart';
+import 'package:gamesheet/model/round.dart';
+import 'package:gamesheet/model/score.dart';
 import 'package:gamesheet/widgets/avatar.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:provider/provider.dart';
 
 class RoundTab extends StatefulWidget {
   final Game game;
-  final List<Player> players;
+  final int numPlayers;
+  final List<String> roundLabels;
   final int index;
 
   const RoundTab({
     super.key,
     required this.game,
-    required this.players,
+    required this.numPlayers,
+    required this.roundLabels,
     required this.index,
   });
 
@@ -27,11 +29,11 @@ class RoundTab extends StatefulWidget {
 }
 
 class _RoundTabState extends State<RoundTab> {
-  Map<int, Round>? _round;
-  bool _isComplete = false;
-
   late final List<TextEditingController>? _bidControllers;
   late final List<TextEditingController> _scoreControllers;
+
+  late List<Player> _players;
+  Map<int, Round>? _round;
 
   @override
   void dispose() {
@@ -44,10 +46,10 @@ class _RoundTabState extends State<RoundTab> {
   void initState() {
     super.initState();
     _bidControllers = widget.game.hasBids
-        ? List.generate(widget.players.length, (_) => TextEditingController())
+        ? List.generate(widget.numPlayers, (_) => TextEditingController())
         : null;
     _scoreControllers = List.generate(
-      widget.players.length,
+      widget.numPlayers,
       (_) => TextEditingController(),
     );
   }
@@ -55,14 +57,15 @@ class _RoundTabState extends State<RoundTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final roundProvider = Provider.of<RoundProvider>(context);
-    _round = roundProvider.round;
-    if (_round == null) {
-      roundProvider.initialize();
-    } else {
+    final gameModel = Provider.of<GameModel>(context);
+    assert(gameModel.players != null);
+    _players = gameModel.players!;
+    final roundModel = Provider.of<RoundModel>(context);
+    _round = roundModel.round;
+    if (_round != null) {
       // Initialize the text fields
-      for (int i = 0; i < widget.players.length; ++i) {
-        Player player = widget.players[i];
+      for (int i = 0; i < _players.length; ++i) {
+        Player player = _players[i];
         assert(player.id != null);
         int? bid = _round![player.id!]?.bid;
         int? score = _round![player.id!]?.score;
@@ -79,12 +82,12 @@ class _RoundTabState extends State<RoundTab> {
 
   @override
   Widget build(BuildContext context) {
-    final roundProvider = Provider.of<RoundProvider>(context);
+    final roundModel = Provider.of<RoundModel>(context);
     return SliverList.builder(
-      itemCount: widget.players.length,
+      itemCount: _players.length,
       itemBuilder: (context, index) {
-        assert(index < widget.players.length);
-        Player player = widget.players[index];
+        assert(index < _players.length);
+        Player player = _players[index];
 
         // Add the player avatar and name
         List<Widget> children = [
@@ -133,16 +136,15 @@ class _RoundTabState extends State<RoundTab> {
                     if (!hasFocus) {
                       String bidText = _bidControllers![index].text.trim();
                       int bid = bidText.isEmpty ? -1 : int.parse(bidText);
-                      Player player = widget.players[index];
+                      Player player = _players[index];
                       assert(player.id != null);
-                      Round? newRound =
-                          roundProvider.updateBid(player.id!, bid);
+                      Round? newRound = roundModel.updateBid(player.id!, bid);
                       if (newRound != null) {
-                        final scoreProvider = Provider.of<ScoreProvider>(
+                        final scoreModel = Provider.of<ScoreModel>(
                           context,
                           listen: false,
                         );
-                        scoreProvider.updateScore(newRound!);
+                        scoreModel.updateScore(newRound!);
                         _checkIfComplete();
                       }
                     }
@@ -179,16 +181,15 @@ class _RoundTabState extends State<RoundTab> {
                 if (!hasFocus) {
                   String scoreText = _scoreControllers[index].text.trim();
                   int score = scoreText.isEmpty ? -1 : int.parse(scoreText);
-                  Player player = widget.players[index];
+                  Player player = _players[index];
                   assert(player.id != null);
-                  Round? newRound =
-                      roundProvider.updateScore(player.id!, score);
+                  Round? newRound = roundModel.updateScore(player.id!, score);
                   if (newRound != null) {
-                    final scoreProvider = Provider.of<ScoreProvider>(
+                    final scoreModel = Provider.of<ScoreModel>(
                       context,
                       listen: false,
                     );
-                    scoreProvider.updateScore(newRound!);
+                    scoreModel.updateScore(newRound!);
                     _checkIfComplete();
                   }
                 }
@@ -206,21 +207,16 @@ class _RoundTabState extends State<RoundTab> {
     );
   }
 
-  void _checkIfComplete() {
-    final scoreProvider = Provider.of<ScoreProvider>(context, listen: false);
-    Future<bool>(() {
-      bool isComplete = true;
-      if (widget.game.hasBids && _bidControllers != null)
-        _bidControllers.forEach((controller) =>
-            isComplete = isComplete && controller.text.isNotEmpty);
-      _scoreControllers.forEach((controller) =>
+  Future<void> _checkIfComplete() async {
+    final scoreModel = Provider.of<ScoreModel>(context, listen: false);
+    bool isComplete = true;
+    if (widget.game.hasBids && _bidControllers != null)
+      _bidControllers.forEach((controller) =>
           isComplete = isComplete && controller.text.isNotEmpty);
-      return isComplete;
-    }).then((result) {
-      if (_isComplete != result) {
-        setState(() => _isComplete = result);
-        scoreProvider.updateRound(widget.index, result);
-      }
-    });
+    _scoreControllers.forEach(
+        (controller) => isComplete = isComplete && controller.text.isNotEmpty);
+    if (scoreModel.isComplete(widget.index) != isComplete) {
+      scoreModel.updateRound(widget.index, isComplete);
+    }
   }
 }

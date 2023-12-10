@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/db/game.dart';
 import 'package:gamesheet/widgets/card.dart';
-import 'package:gamesheet/widgets/loader.dart';
-import 'package:gamesheet/widgets/rounded_text_field.dart';
+import 'package:gamesheet/widgets/dialog.dart';
+import 'package:gamesheet/widgets/newgame/rounded_text_field.dart';
+import 'package:gamesheet/widgets/newgame/player_input.dart';
+import 'package:gamesheet/widgets/newgame/player_text_fields.dart';
+import 'package:gamesheet/widgets/newgame/game_type_popup.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import './creategame/player_controller.dart';
-import './creategame/player_text_fields.dart';
-import './creategame/game_type_popup.dart';
 
-const int maxNumPlayers = 16;
-const int maxNameLength = 40;
-
-class CreateGameScreen extends StatefulWidget {
-  const CreateGameScreen({super.key});
+class NewGameScreen extends StatefulWidget {
+  const NewGameScreen({super.key});
 
   @override
-  State<CreateGameScreen> createState() => _CreateGameScreenState();
+  State<NewGameScreen> createState() => _NewGameScreenState();
 }
 
-class _CreateGameScreenState extends State<CreateGameScreen> {
-  final TextEditingController _nameController = TextEditingController();
+class _NewGameScreenState extends State<NewGameScreen> {
+  static final int maxNumPlayers = 16;
+  static final int maxNameLength = 40;
+
+  late final TextEditingController _nameController;
   late final List<PlayerController> _playerControllers;
 
   GameType _selectedGameType = GameType.train;
@@ -37,14 +38,14 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   @override
   void initState() {
     super.initState();
+    _nameController = TextEditingController();
     _playerControllers = [PlayerController.random()];
   }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(title: Text('Create Game')),
+      appBar: AppBar(title: Text('New Game')),
       body: Padding(
         padding: const EdgeInsets.only(top: 8),
         child: ListView(
@@ -127,7 +128,41 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   }
 
   void _createGame(BuildContext context) {
-    var finalizedName = _nameController.text.trim();
+    var results = _validateGame();
+    if (results != null) {
+      var (name, players) = results!;
+      loaderDialog(context, () async {
+        await GameDatabase.addGame(
+          Game(
+            name: name,
+            type: _selectedGameType,
+            created: DateTime.now(),
+          ),
+          players,
+        );
+      }).then((_) => Navigator.of(context).pop(true));
+    }
+  }
+
+  (String, List<(String, Palette)>)? _validateGame() {
+    String? name = _validateName();
+    List<(String, Palette)>? players = _validatePlayers();
+    if (name == null || players == null) {
+      setState(() {
+        _nameError = name == null ? 'Enter a name for the game' : null;
+        _playerError = players == null ? 'Add a player to the game' : null;
+      });
+      return null;
+    }
+    return (name!, players!);
+  }
+
+  String? _validateName() {
+    String name = _nameController.text.trim();
+    return name.isEmpty ? null : name;
+  }
+
+  List<(String, Palette)>? _validatePlayers() {
     var finalizedPlayers = _playerControllers
         .take(maxNumPlayers)
         .map((player) => (player.text.trim(), player.color))
@@ -136,27 +171,6 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
       var (name, _) = item;
       return name.isEmpty;
     });
-    if (finalizedName.isEmpty || finalizedPlayers.isEmpty) {
-      setState(() {
-        _nameError = finalizedName.isEmpty ? 'Enter a name for the game' : null;
-        _playerError =
-            finalizedPlayers.isEmpty ? 'Add a player to the game' : null;
-      });
-    } else {
-      setState(() {
-        _nameError = null;
-        _playerError = null;
-      });
-      loaderDialog(context, () async {
-        await GameDatabase.addGame(
-          Game(
-            name: finalizedName,
-            type: _selectedGameType,
-            created: DateTime.now(),
-          ),
-          finalizedPlayers,
-        );
-      }).then((_) => Navigator.of(context).pop(true));
-    }
+    return finalizedPlayers.isEmpty ? null : finalizedPlayers;
   }
 }

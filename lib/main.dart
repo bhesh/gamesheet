@@ -1,5 +1,6 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform, exit;
+import 'dart:ui' show PlatformDispatcher;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
@@ -12,14 +13,30 @@ import './common/themes.dart';
 const double windowWidth = 400;
 const double windowHeight = 800;
 
-Future main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  platformInit();
-  await AppDatabase.initialize();
-  SettingsMap settings = await SettingsDatabase.getSettings();
-  runApp(ThemeChangerWidget(
-    initialSettings: settings,
-  ));
+Future<void> main() async {
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    platformInit();
+    await AppDatabase.initialize();
+    SettingsMap settings = await SettingsDatabase.getSettings();
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+      if (kDebugMode) print(details);
+      exit(1);
+    };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      print(error.toString());
+      if (kDebugMode) print(stack.toString());
+      exit(1);
+    };
+    runApp(ThemeChangerWidget(
+      initialSettings: settings,
+    ));
+  } catch (error, stack) {
+    print(error.toString());
+    if (kDebugMode) print(stack.toString());
+    exit(1);
+  }
 }
 
 void platformInit() {
@@ -53,7 +70,7 @@ class ThemeChangerWidget extends StatelessWidget {
         initialSettings.themeColor,
         initialSettings.themeIsDark,
       ),
-      child: MyApp(),
+      child: const MyApp(),
     );
   }
 }
