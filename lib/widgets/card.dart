@@ -50,6 +50,9 @@ class GamesheetCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
         margin: margin,
         color: color,
         elevation: elevation,

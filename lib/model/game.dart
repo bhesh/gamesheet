@@ -7,17 +7,15 @@ import 'package:gamesheet/db/game.dart';
 
 class GameModel extends ChangeNotifier {
   final Game game;
-  List<String>? _roundLabels;
   List<Player>? _players;
 
   GameModel(this.game) : assert(game.id != null) {
     initialize();
   }
 
-  UnmodifiableListView<String>? get roundLabels =>
-      _roundLabels == null ? null : UnmodifiableListView(_roundLabels!);
+  int get numRounds => game.numRounds;
 
-  int? get numRounds => _roundLabels == null ? null : _roundLabels!.length;
+  UnmodifiableListView<String> get roundLabels => game.roundLabels;
 
   UnmodifiableListView<Player>? get players =>
       _players == null ? null : UnmodifiableListView(_players!);
@@ -25,7 +23,6 @@ class GameModel extends ChangeNotifier {
   Future<void> initialize() async {
     var players = await GameDatabase.getPlayers(game.id!);
     assert(players.isNotEmpty);
-    _roundLabels = game.roundLabels(players.length);
     _players = players;
     notifyListeners();
   }

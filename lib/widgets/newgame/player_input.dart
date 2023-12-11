@@ -28,11 +28,9 @@ class PlayerController {
     focusNode.dispose();
   }
 
-  String get text => textController.text;
+  String get text => textController.text.trim();
 
-  void randomColor() {
-    color = Palette.random;
-  }
+  String? get name => text.isNotEmpty ? text : null;
 }
 
 class PlayerInput extends StatelessWidget {

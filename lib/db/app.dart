@@ -2,14 +2,14 @@ import 'dart:io';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart'
     show getApplicationSupportDirectory;
-import 'package:sqflite/sqflite.dart' as sqflite;
+import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 const int dbVersion = 1;
 
-DatabaseFactory get databaseFactory => (Platform.isLinux || Platform.isWindows)
+DatabaseFactory get dbFactory => (Platform.isLinux || Platform.isWindows)
     ? databaseFactoryFfi
-    : sqflite.databaseFactory;
+    : databaseFactory;
 
 class AppDatabase {
   static Database? _settingsDatabase;
@@ -28,7 +28,7 @@ class AppDatabase {
     final Directory directory = await getApplicationSupportDirectory();
     final dbPath = join(directory.path, 'settings.db');
     print('Settings database path: $dbPath');
-    _settingsDatabase = await databaseFactory.openDatabase(
+    _settingsDatabase = await dbFactory.openDatabase(
       dbPath,
       options: OpenDatabaseOptions(
         onCreate: (db, version) async => await createSettingsDatabase(db),
@@ -64,7 +64,7 @@ class AppDatabase {
     final Directory directory = await getApplicationSupportDirectory();
     final dbPath = join(directory.path, 'database.db');
     print('Game database path: $dbPath');
-    _gameDatabase = await databaseFactory.openDatabase(
+    _gameDatabase = await dbFactory.openDatabase(
       dbPath,
       options: OpenDatabaseOptions(
         onCreate: (db, version) async => await createGameDatabase(db),
@@ -77,7 +77,7 @@ class AppDatabase {
     return _gameDatabase!;
   }
 
-  static Future createGameDatabase(Database db) async {
+  static Future createGameDatabase(final Database db) async {
     var batch = db.batch();
     batch.execute('DROP TABLE IF EXISTS games');
     batch.execute(
@@ -86,6 +86,10 @@ class AppDatabase {
           id INTEGER PRIMARY KEY,
           name TEXT NOT NULL,
           type INTEGER NOT NULL,
+          numPlayers INTEGER NOT NULL,
+          numRounds INTEGER NOT NULL,
+          scoring INTEGER NOT NULL,
+          dealer INTEGER NOT NULL,
           created INTEGER NOT NULL
       )
       ''',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/common/score.dart';
 import 'package:gamesheet/db/game.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:gamesheet/widgets/dialog.dart';
@@ -25,6 +26,7 @@ class _NewGameScreenState extends State<NewGameScreen> {
   late final List<PlayerController> _playerControllers;
 
   GameType _selectedGameType = GameType.train;
+  PlayerController? _selectedPlayer;
   String? _nameError;
   String? _playerError;
 
@@ -132,16 +134,54 @@ class _NewGameScreenState extends State<NewGameScreen> {
     if (results != null) {
       var (name, players) = results!;
       loaderDialog(context, () async {
-        await GameDatabase.addGame(
-          Game(
-            name: name,
-            type: _selectedGameType,
-            created: DateTime.now(),
-          ),
-          players,
-        );
+        switch (_selectedGameType) {
+          case GameType.train:
+            await GameDatabase.addGame(
+              Game.train(
+                name: name,
+                numPlayers: players.length,
+              ),
+              players,
+            );
+          case GameType.ping:
+            await GameDatabase.addGame(
+              Game.ping(
+                name: name,
+                numPlayers: players.length,
+                dealer: 0,
+              ),
+              players,
+            );
+          case GameType.wizard:
+            await GameDatabase.addGame(
+              Game.wizard(
+                name: name,
+                numPlayers: players.length,
+                dealer: 0,
+              ),
+              players,
+            );
+          case GameType.custom:
+            await GameDatabase.addGame(
+              Game.custom(
+                name: name,
+                numPlayers: players.length,
+                numRounds: 21,
+                scoring: Scoring.lowest,
+              ),
+              players,
+            );
+        }
       }).then((_) => Navigator.of(context).pop(true));
     }
+  }
+
+  List<(String, Palette)> _getPlayerList() {
+    return _playerControllers
+        .where((player) => player.name != null)
+        .take(maxNumPlayers)
+        .map((player) => (player.name!, player.color))
+        .toList();
   }
 
   (String, List<(String, Palette)>)? _validateGame() {
@@ -163,14 +203,7 @@ class _NewGameScreenState extends State<NewGameScreen> {
   }
 
   List<(String, Palette)>? _validatePlayers() {
-    var finalizedPlayers = _playerControllers
-        .take(maxNumPlayers)
-        .map((player) => (player.text.trim(), player.color))
-        .toList();
-    finalizedPlayers.removeWhere((item) {
-      var (name, _) = item;
-      return name.isEmpty;
-    });
-    return finalizedPlayers.isEmpty ? null : finalizedPlayers;
+    var players = _getPlayerList();
+    return players.isEmpty ? null : players;
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:io' show Platform, exit;
 import 'dart:ui' show PlatformDispatcher;
-import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb, kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
@@ -21,13 +21,12 @@ Future<void> main() async {
     SettingsMap settings = await SettingsDatabase.getSettings();
     FlutterError.onError = (details) {
       FlutterError.presentError(details);
-      if (kDebugMode) print(details);
-      exit(1);
+      if (kReleaseMode) exit(1);
     };
     PlatformDispatcher.instance.onError = (error, stack) {
       print(error.toString());
-      if (kDebugMode) print(stack.toString());
-      exit(1);
+      if (kReleaseMode) exit(1);
+      return true;
     };
     runApp(ThemeChangerWidget(
       initialSettings: settings,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/common/player.dart';
-import 'package:gamesheet/common/games/score.dart';
+import 'package:gamesheet/common/score.dart';
 
 enum BarGraphType {
   round,
@@ -76,11 +76,10 @@ class BarGraph extends StatelessWidget {
             maxValue: maxValue ?? 0,
           ));
         case BarGraphType.average:
-          final numRounds = game.numRounds(players.length);
           children.add(_ScoreBar(
             name: player.name,
             color: player.color,
-            value: score == null ? 0 : score!.totalScore / numRounds,
+            value: score == null ? 0 : score!.totalScore / game.numRounds,
             minValue: minValue ?? 0,
             maxValue: maxValue ?? 0,
           ));

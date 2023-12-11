@@ -9,6 +9,7 @@ import 'package:gamesheet/model/score.dart';
 import 'package:gamesheet/widgets/avatar.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:provider/provider.dart';
+import './player_input.dart';
 
 class RoundTab extends StatefulWidget {
   final Game game;
@@ -82,126 +83,53 @@ class _RoundTabState extends State<RoundTab> {
 
   @override
   Widget build(BuildContext context) {
+    // Get dealer information
+    int? dealerIndex = widget.game.dealer < 0
+        ? null
+        : (widget.game.dealer! + widget.index) % _players.length;
+
     final roundModel = Provider.of<RoundModel>(context);
     return SliverList.builder(
       itemCount: _players.length,
       itemBuilder: (context, index) {
-        assert(index < _players.length);
         Player player = _players[index];
 
-        // Add the player avatar and name
-        List<Widget> children = [
-          GamesheetAvatar(
-            name: player.name,
-            color: player.color,
-          ),
-          Padding(padding: const EdgeInsets.only(right: 16)),
-          Container(
-            width: widget.game.hasBids ? 100 : 186,
-            child: Text(
-              player.name,
-              style: Theme.of(context).textTheme.titleMedium,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const Spacer(),
-        ];
-
-        // Add a bid input field if the game has bids
-        if (widget.game.hasBids) {
-          children.add(
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Container(
-                width: 70,
-                child: Focus(
-                  child: TextField(
-                    controller: _bidControllers![index],
-                    maxLength: 4,
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: widget.game.bidText,
-                      counterText: "",
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 0,
-                        horizontal: 8,
-                      ),
-                    ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                  ),
-                  onFocusChange: (hasFocus) {
-                    if (!hasFocus) {
-                      String bidText = _bidControllers![index].text.trim();
-                      int bid = bidText.isEmpty ? -1 : int.parse(bidText);
-                      Player player = _players[index];
-                      assert(player.id != null);
-                      Round? newRound = roundModel.updateBid(player.id!, bid);
-                      if (newRound != null) {
-                        final scoreModel = Provider.of<ScoreModel>(
-                          context,
-                          listen: false,
-                        );
-                        scoreModel.updateScore(newRound!);
-                        _checkIfComplete();
-                      }
-                    }
-                  },
-                ),
-              ),
-            ),
-          );
-        }
-
-        // Add a score input field
-        children.add(
-          Container(
-            width: 70,
-            child: Focus(
-              child: TextField(
-                controller: _scoreControllers![index],
-                maxLength: 4,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: widget.game.scoreText,
-                  counterText: "",
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 0,
-                    horizontal: 8,
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-              ),
-              onFocusChange: (hasFocus) {
-                if (!hasFocus) {
-                  String scoreText = _scoreControllers[index].text.trim();
-                  int score = scoreText.isEmpty ? -1 : int.parse(scoreText);
-                  Player player = _players[index];
-                  assert(player.id != null);
-                  Round? newRound = roundModel.updateScore(player.id!, score);
-                  if (newRound != null) {
-                    final scoreModel = Provider.of<ScoreModel>(
-                      context,
-                      listen: false,
-                    );
-                    scoreModel.updateScore(newRound!);
-                    _checkIfComplete();
-                  }
-                }
-              },
-            ),
-          ),
-        );
-
-        // Make child
-        return GamesheetCard(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          child: Row(children: children),
+        return PlayerInput(
+          game: widget.game,
+          player: player,
+          isDealer: dealerIndex == null ? null : dealerIndex! == index,
+          bidController: _bidControllers?[index],
+          onBidUnfocus: () {
+            String bidText = _bidControllers![index].text.trim();
+            int bid = bidText.isEmpty ? -1 : int.parse(bidText);
+            Player player = _players[index];
+            assert(player.id != null);
+            Round? newRound = roundModel.updateBid(player.id!, bid);
+            if (newRound != null) {
+              final scoreModel = Provider.of<ScoreModel>(
+                context,
+                listen: false,
+              );
+              scoreModel.updateScore(newRound!);
+              _checkIfComplete();
+            }
+          },
+          scoreController: _scoreControllers[index],
+          onScoreUnfocus: () {
+            String scoreText = _scoreControllers[index].text.trim();
+            int score = scoreText.isEmpty ? -1 : int.parse(scoreText);
+            Player player = _players[index];
+            assert(player.id != null);
+            Round? newRound = roundModel.updateScore(player.id!, score);
+            if (newRound != null) {
+              final scoreModel = Provider.of<ScoreModel>(
+                context,
+                listen: false,
+              );
+              scoreModel.updateScore(newRound!);
+              _checkIfComplete();
+            }
+          },
         );
       },
     );

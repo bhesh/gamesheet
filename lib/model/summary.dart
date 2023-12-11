@@ -1,5 +1,5 @@
 import 'package:gamesheet/common/game.dart';
-import 'package:gamesheet/common/games/score.dart';
+import 'package:gamesheet/common/score.dart';
 
 class ScoreRange {
   num minValue;
@@ -20,12 +20,11 @@ class GameSummary {
 
 Future<GameSummary> calculateSummary(Game game, Map<int, Score> scores) async {
   assert(scores.length > 0);
-  final numRounds = game.numRounds(scores.length);
   int initialScore = scores.values.first.totalScore;
   ScoreRange totalScoreRange = ScoreRange(initialScore, initialScore);
   ScoreRange averageScoreRange = ScoreRange(
-    initialScore / numRounds,
-    initialScore / numRounds,
+    initialScore / game.numRounds,
+    initialScore / game.numRounds,
   );
   scores.values.forEach((score) {
     final totalScore = score.totalScore;
@@ -33,7 +32,7 @@ Future<GameSummary> calculateSummary(Game game, Map<int, Score> scores) async {
       totalScoreRange.minValue = totalScore;
     if (totalScore > totalScoreRange.maxValue)
       totalScoreRange.maxValue = totalScore;
-    final averageScore = totalScore / numRounds;
+    final averageScore = totalScore / game.numRounds;
     if (averageScore < averageScoreRange.minValue)
       averageScoreRange.minValue = averageScore;
     if (averageScore > averageScoreRange.maxValue)

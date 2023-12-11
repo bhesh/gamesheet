@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/widgets/newgame/player_input.dart';
 
-class GameTypePopup extends StatelessWidget {
-  final GameType selected;
-  final void Function(GameType)? onSelected;
+class PlayerPopup extends StatelessWidget {
+  final List<(String, Palette)> players;
+  final int selected;
+  final void Function(int)? onSelected;
 
-  const GameTypePopup({
+  const PlayerPopup({
+    required this.playerControllers,
     required this.selected,
     this.onSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    return _GameTypePopupItem(
-      item: selected,
+    assert(selected < playerControllers.length);
+    return _PlayerPopupItem(
+      item: playerControllers[selected],
       onSelected: () => _popup(context),
     );
   }
@@ -26,12 +31,13 @@ class GameTypePopup extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: ListView.separated(
             shrinkWrap: true,
-            itemCount: GameType.values.length,
+            itemCount: players.length,
             itemBuilder: (context, index) {
-              return _GameTypePopupItem(
-                item: GameType.values[index],
+              String? name = playerControllers[index].name;
+              return _PlayerPopupItem(
+                item: Player.values[index],
                 onSelected: () {
-                  if (onSelected != null) onSelected!(GameType.values[index]);
+                  if (onSelected != null) onSelected!(Player.values[index]);
                   Navigator.of(context).pop();
                 },
               );
@@ -45,13 +51,15 @@ class GameTypePopup extends StatelessWidget {
   }
 }
 
-class _GameTypePopupItem extends StatelessWidget {
-  final GameType item;
+class _PlayerPopupItem extends StatelessWidget {
+  final String name;
+  final Palette color;
   final void Function()? onSelected;
 
-  const _GameTypePopupItem({
+  const _PlayerPopupItem({
     super.key,
-    required this.item,
+    required this.name,
+    required this.color,
     this.onSelected,
   });
 
