@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
 import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/models/game.dart';
-import 'package:gamesheet/models/score.dart';
 import 'package:gamesheet/models/summary.dart';
 import 'package:gamesheet/widgets/game/winner_list.dart';
 import 'package:provider/provider.dart';
