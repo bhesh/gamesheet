@@ -8,7 +8,8 @@ import './common/settings.dart';
 import './db/app.dart';
 import './db/settings.dart';
 import './screens/home.dart';
-import './common/themes.dart';
+import './models/game_list.dart';
+import './models/settings.dart';
 
 const double windowWidth = 400;
 const double windowHeight = 800;
@@ -28,9 +29,7 @@ Future<void> main() async {
       if (kReleaseMode) exit(1);
       return true;
     };
-    runApp(ThemeChangerWidget(
-      initialSettings: settings,
-    ));
+    runApp(MyApp(initialSettings: settings));
   } catch (error, stack) {
     print(error.toString());
     if (kDebugMode) print(stack.toString());
@@ -54,36 +53,29 @@ void platformInit() {
   }
 }
 
-class ThemeChangerWidget extends StatelessWidget {
+class MyApp extends StatelessWidget {
   final SettingsMap initialSettings;
 
-  const ThemeChangerWidget({
+  const MyApp({
     super.key,
     required this.initialSettings,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ThemeChanger(
-        initialSettings.themeColor,
-        initialSettings.themeIsDark,
-      ),
-      child: const MyApp(),
-    );
-  }
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Provider.of<ThemeChanger>(context);
-    return MaterialApp(
-      title: 'Gamesheet',
-      theme: theme.data,
-      home: const HomeScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SettingsModel(initialSettings)),
+        ChangeNotifierProvider(create: (_) => GameListModel()),
+      ],
+      builder: (context, _) {
+        final settingsModel = Provider.of<SettingsModel>(context);
+        return MaterialApp(
+          title: 'Gamesheet',
+          theme: settingsModel.themeData,
+          home: const HomeScreen(),
+        );
+      },
     );
   }
 }

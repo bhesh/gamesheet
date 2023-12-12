@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitRing;
 import 'package:gamesheet/common/game.dart';
-import 'package:gamesheet/model/game_list.dart';
+import 'package:gamesheet/models/game_list.dart';
 import 'package:gamesheet/widgets/dialog.dart';
 import 'package:gamesheet/widgets/message.dart';
 import 'package:provider/provider.dart';
 import './game_list_card.dart';
 
 class GameList extends StatelessWidget {
-  final void Function(Game game)? onSelected;
+  final void Function(Game)? onSelected;
   final String? filter;
 
   const GameList({
@@ -19,14 +19,14 @@ class GameList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<GameListModel>(context);
-    return provider.games == null
+    final gameList = Provider.of<GameListModel>(context);
+    return gameList.games == null
         ? SpinKitRing(
             color: Theme.of(context).colorScheme.primary,
             size: 50,
           )
-        : provider.games!.isNotEmpty
-            ? _buildListView(context, _filtered(provider.games!))
+        : gameList.games!.isNotEmpty
+            ? _buildListView(context, _filtered(gameList.games!))
             : GamesheetMessage('No games');
   }
 
@@ -40,7 +40,7 @@ class GameList extends StatelessWidget {
   }
 
   Widget _buildListView(BuildContext context, List<Game> games) {
-    final provider = Provider.of<GameListModel>(context);
+    final gameList = Provider.of<GameListModel>(context);
     return ListView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -52,7 +52,7 @@ class GameList extends StatelessWidget {
         return Dismissible(
           key: ValueKey(gameId),
           direction: DismissDirection.endToStart,
-          onDismissed: (_) => provider.removeGame(gameId),
+          onDismissed: (_) => gameList.removeGame(gameId),
           confirmDismiss: (_) => confirmDeleteDialog(
             context,
             'Do you wish to delete this game?',

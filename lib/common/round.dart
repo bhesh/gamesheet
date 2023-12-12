@@ -2,45 +2,38 @@ class Round {
   final int gameId;
   final int playerId;
   final int round;
-  final int bid;
-  final int score;
+  final int? bid;
+  final int? score;
 
   const Round({
     required this.gameId,
     required this.playerId,
     required this.round,
-    this.bid = -1,
-    this.score = -1,
+    this.bid,
+    this.score,
   });
 
-  const Round.raw({
-    required this.gameId,
-    required this.playerId,
-    required this.round,
-    required this.bid,
-    required this.score,
-  });
-
-  Round.fromMap(Map<String, dynamic> map)
-      : this.gameId = map['gameId'],
-        this.playerId = map['playerId'],
-        this.round = map['round'],
-        this.bid = map['bid'],
-        this.score = map['score'];
+  factory Round.fromMap(Map<String, dynamic> map) {
+    return Round(
+      gameId: map['gameId'],
+      playerId: map['playerId'],
+      round: map['round'],
+      bid: map['bid'] < 0 ? null : map['bid'],
+      score: map['score'] < 0 ? null : map['score'],
+    );
+  }
 
   Round copyWith({
-    int? gameId,
-    int? playerId,
-    int? round,
     int? bid,
     int? score,
+    bool overwrite = false,
   }) {
-    return Round.raw(
-      gameId: gameId ?? this.gameId,
-      playerId: playerId ?? this.playerId,
-      round: round ?? this.round,
-      bid: bid ?? this.bid,
-      score: score ?? this.score,
+    return Round(
+      gameId: this.gameId,
+      playerId: this.playerId,
+      round: this.round,
+      bid: overwrite ? bid : bid ?? this.bid,
+      score: overwrite ? score : score ?? this.score,
     );
   }
 
@@ -49,8 +42,8 @@ class Round {
       'gameId': gameId,
       'playerId': playerId,
       'round': round,
-      'bid': bid,
-      'score': score,
+      'bid': bid == null ? -1 : bid,
+      'score': score == null ? -1 : score,
     };
     return map;
   }

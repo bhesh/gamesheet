@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import './score.dart';
 
 enum GameType {
   train(1, 'Train', Symbols.directions_subway),
@@ -49,6 +48,50 @@ enum GameType {
   }
 }
 
+enum Scoring {
+  lowest(1, 'Lowest Score'),
+  highest(2, 'Highest Score'),
+  wizard(3, 'Wizard Scoring');
+
+  final int id;
+  final String label;
+
+  const Scoring(this.id, this.label);
+
+  factory Scoring.fromId(int id) {
+    return values.firstWhere((e) => e.id == id);
+  }
+
+  int calculate(int? bid, int? score) {
+    switch (this) {
+      case Scoring.lowest:
+        return score ?? 0;
+      case Scoring.highest:
+        return score ?? 0;
+      case Scoring.wizard:
+        if (bid == null || score == null) return 0;
+        if (bid! == score!) return (bid! + 2) * 10;
+        return (bid! - score!).abs() * -10;
+    }
+  }
+
+  /// negative number if left score is winning
+  /// 0 if scores are tied
+  /// positive number if right score is winning
+  int compareScores(int leftScore, int rightScore) {
+    switch (this) {
+      case Scoring.lowest:
+        if (leftScore < rightScore) return -1;
+        if (leftScore == rightScore) return 0;
+        return 1;
+      default:
+        if (leftScore < rightScore) return 1;
+        if (leftScore == rightScore) return 0;
+        return -1;
+    }
+  }
+}
+
 class Game {
   final int? id;
   final String name;
@@ -57,77 +100,78 @@ class Game {
   final int numRounds;
   final UnmodifiableListView<String> roundLabels;
   final Scoring scoring;
-  final int dealer;
+  final int? dealer;
   final DateTime created;
 
-  Game.raw({
-    required int id,
+  Game({
+    this.id,
     required this.name,
     required this.type,
     required this.numPlayers,
     required this.numRounds,
     required this.scoring,
-    required this.dealer,
+    this.dealer,
     required this.created,
-  })  : this.id = id,
-        this.roundLabels = type.roundLabels(numRounds),
-        assert(dealer == -1 || dealer! < numPlayers);
+  })  : this.roundLabels = type.roundLabels(numRounds),
+        assert(dealer == null || dealer! < numPlayers);
 
   Game.train({
+    this.id,
     required this.name,
     required this.numPlayers,
-  })  : this.id = null,
-        this.type = GameType.train,
+  })  : this.type = GameType.train,
         this.numRounds = 13,
         this.roundLabels = GameType.train.roundLabels(13),
         this.scoring = Scoring.lowest,
-        this.dealer = -1,
+        this.dealer = null,
         this.created = DateTime.now();
 
   Game.ping({
+    this.id,
     required this.name,
     required this.numPlayers,
-    required this.dealer,
-  })  : this.id = null,
-        this.type = GameType.ping,
+    required int dealer,
+  })  : this.type = GameType.ping,
         this.numRounds = 11,
         this.roundLabels = GameType.ping.roundLabels(11),
         this.scoring = Scoring.lowest,
         this.created = DateTime.now(),
-        assert(dealer! < numPlayers);
+        assert(dealer < numPlayers),
+        this.dealer = dealer;
 
   Game.wizard({
+    this.id,
     required this.name,
     required this.numPlayers,
-    required this.dealer,
-  })  : this.id = null,
-        this.type = GameType.wizard,
+    required int dealer,
+  })  : this.type = GameType.wizard,
         this.numRounds = 60 ~/ numPlayers,
         this.roundLabels = GameType.wizard.roundLabels(60 ~/ numPlayers),
         this.scoring = Scoring.wizard,
         this.created = DateTime.now(),
-        assert(dealer! < numPlayers);
+        assert(dealer < numPlayers),
+        this.dealer = dealer;
 
   Game.custom({
+    this.id,
     required this.name,
     required this.numPlayers,
     required this.numRounds,
     required this.scoring,
-    this.dealer = -1,
-  })  : this.id = null,
-        this.type = GameType.custom,
+    this.dealer,
+  })  : this.type = GameType.custom,
         this.roundLabels = GameType.custom.roundLabels(numRounds),
         this.created = DateTime.now();
 
   factory Game.fromMap(Map<String, dynamic> map) {
-    return Game.raw(
+    return Game(
       id: map['id'],
       name: map['name'],
       type: GameType.fromId(map['type']),
       numPlayers: map['numPlayers'],
       numRounds: map['numRounds'],
       scoring: Scoring.fromId(map['scoring']),
-      dealer: map['dealer'],
+      dealer: map['dealer'] == -1 ? null : map['dealer'],
       created: DateTime.fromMillisecondsSinceEpoch(map['created']),
     );
   }
@@ -139,16 +183,16 @@ class Game {
       'numPlayers': numPlayers,
       'numRounds': numRounds,
       'scoring': scoring.id,
+      'dealer': dealer == null ? -1 : dealer,
       'created': created.millisecondsSinceEpoch,
     };
     if (id != null) map['id'] = id!;
-    if (dealer != null) map['dealer'] = dealer!;
     return map;
   }
 
   bool get hasDealer => dealer != null;
 
-  bool get hasBids => type == GameType.wizard;
+  bool get hasBids => scoring == Scoring.wizard;
 
   String get bidText => 'bid';
 

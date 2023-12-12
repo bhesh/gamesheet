@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/common/player.dart';
 import 'package:gamesheet/widgets/avatar.dart';
 import 'package:gamesheet/widgets/card.dart';
+import 'package:gamesheet/widgets/number_input.dart';
 
 class PlayerInput extends StatelessWidget {
   final Game game;
@@ -62,7 +62,7 @@ class PlayerInput extends StatelessWidget {
         alignment: Alignment.centerRight,
         child: Padding(
           padding: const EdgeInsets.only(top: 16, bottom: 16, right: 16),
-          child: _NumberInput(
+          child: NumberInput(
             labelText: game.scoreText,
             controller: scoreController,
             onUnfocus: onScoreUnfocus,
@@ -78,7 +78,7 @@ class PlayerInput extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: Padding(
             padding: const EdgeInsets.only(top: 16, bottom: 16, right: 106),
-            child: _NumberInput(
+            child: NumberInput(
               labelText: game.bidText,
               controller: bidController,
               onUnfocus: onBidUnfocus,
@@ -115,48 +115,6 @@ class PlayerInput extends StatelessWidget {
             children: children,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _NumberInput extends StatelessWidget {
-  final String labelText;
-  final TextEditingController? controller;
-  final void Function()? onUnfocus;
-
-  const _NumberInput({
-    super.key,
-    required this.labelText,
-    this.controller,
-    this.onUnfocus,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 70,
-      child: Focus(
-        child: TextField(
-          controller: controller,
-          maxLength: 4,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            labelText: labelText,
-            counterText: "",
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 8,
-            ),
-          ),
-          keyboardType: TextInputType.number,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-        ),
-        onFocusChange: (hasFocus) {
-          if (!hasFocus && onUnfocus != null) onUnfocus!();
-        },
       ),
     );
   }

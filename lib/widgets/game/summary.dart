@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/common/player.dart';
 import 'package:gamesheet/common/score.dart';
-import 'package:gamesheet/model/summary.dart';
+import 'package:gamesheet/models/summary.dart';
 import 'package:gamesheet/widgets/card.dart';
 import 'package:provider/provider.dart';
 import './bar_graph.dart';

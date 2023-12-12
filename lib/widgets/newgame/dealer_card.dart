@@ -1,24 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/common/game.dart';
-import 'package:gamesheet/widgets/newgame/player_input.dart';
+import 'package:gamesheet/widgets/card.dart';
 
-class PlayerPopup extends StatelessWidget {
+class DealerCard extends StatelessWidget {
   final List<(String, Palette)> players;
   final int selected;
   final void Function(int)? onSelected;
 
-  const PlayerPopup({
-    required this.playerControllers,
+  const DealerCard({
+    super.key,
+    required this.players,
+    this.selected = 0,
+    this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GamesheetCard(
+      title: 'First Dealer',
+      child: _PlayerPopup(
+        players: players,
+        selected: selected,
+        onSelected: onSelected,
+      ),
+    );
+  }
+}
+
+class _PlayerPopup extends StatelessWidget {
+  final List<(String, Palette)> players;
+  final int selected;
+  final void Function(int)? onSelected;
+
+  const _PlayerPopup({
+    required this.players,
     required this.selected,
     this.onSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    assert(selected < playerControllers.length);
+    assert(selected < players.length);
+    var (name, color) = players[selected];
     return _PlayerPopupItem(
-      item: playerControllers[selected],
+      name: name,
+      color: color,
       onSelected: () => _popup(context),
     );
   }
@@ -33,11 +60,12 @@ class PlayerPopup extends StatelessWidget {
             shrinkWrap: true,
             itemCount: players.length,
             itemBuilder: (context, index) {
-              String? name = playerControllers[index].name;
+              var (name, color) = players[index];
               return _PlayerPopupItem(
-                item: Player.values[index],
+                name: name,
+                color: color,
                 onSelected: () {
-                  if (onSelected != null) onSelected!(Player.values[index]);
+                  if (onSelected != null) onSelected!(index);
                   Navigator.of(context).pop();
                 },
               );
@@ -65,7 +93,6 @@ class _PlayerPopupItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return InkWell(
       borderRadius: BorderRadius.circular(29),
       onTap: onSelected,
@@ -73,32 +100,22 @@ class _PlayerPopupItem extends StatelessWidget {
         padding: const EdgeInsets.only(
           top: 12,
           bottom: 11,
-          left: 18,
-          right: 10,
         ),
-        width: size.width * 0.8,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+          color: addEmphasis(
+            Theme.of(context).brightness == Brightness.light,
+            color.background,
+            50,
+          ),
           borderRadius: BorderRadius.circular(29),
         ),
-        child: Row(
-          children: <Widget>[
-            Icon(
-              item.icon,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.75),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: Text(
-                item.label,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.75)),
-              ),
-            ),
-          ],
+        child: Center(
+          child: Text(
+            name,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color:
+                    Theme.of(context).colorScheme.onSurface.withOpacity(0.75)),
+          ),
         ),
       ),
     );

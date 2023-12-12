@@ -7,10 +7,11 @@ class Player {
   final Palette color;
 
   const Player({
+    this.id,
     required this.name,
     required this.color,
     required this.gameId,
-  }) : this.id = null;
+  });
 
   const Player.raw({
     required this.id,
@@ -19,21 +20,22 @@ class Player {
     required this.color,
   });
 
-  Player.fromMap(Map<String, dynamic> map)
-      : this.id = map['id'],
-        this.gameId = map['gameId'],
-        this.name = map['name'],
-        this.color = Palette.fromId(map['color']);
+  factory Player.fromMap(Map<String, dynamic> map) {
+    return Player(
+      id: map['id'],
+      gameId: map['gameId'],
+      name: map['name'],
+      color: Palette.fromId(map['color']),
+    );
+  }
 
   Player copyWith({
-    int? id,
     String? name,
     Palette? color,
-    int? gameId,
   }) {
     return Player.raw(
-      id: id ?? this.id,
-      gameId: gameId ?? this.gameId,
+      id: this.id,
+      gameId: this.gameId,
       name: name ?? this.name,
       color: color ?? this.color,
     );

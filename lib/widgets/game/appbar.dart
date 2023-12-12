@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/game.dart';
-import 'package:gamesheet/model/score.dart';
+import 'package:gamesheet/models/game.dart';
 import 'package:provider/provider.dart';
 import './winner_list.dart';
 
 class GameAppBar extends StatelessWidget {
   final Game game;
-  final int numPlayers;
-  final List<String> roundLabels;
   final TabController controller;
 
   const GameAppBar({
     super.key,
     required this.game,
-    required this.numPlayers,
-    required this.roundLabels,
     required this.controller,
   });
 
@@ -28,7 +24,7 @@ class GameAppBar extends StatelessWidget {
       floating: false,
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {
-          final scoreModel = Provider.of<ScoreModel>(context);
+          final gameModel = Provider.of<GameModel>(context);
           return constraints.biggest.height < 200
               ? Container()
               : Padding(
@@ -36,7 +32,7 @@ class GameAppBar extends StatelessWidget {
                     top: constraints.biggest.height - 120,
                   ),
                   child: WinnerList(
-                    winners: scoreModel.winners,
+                    winners: gameModel.winners,
                     textColor: Theme.of(context).colorScheme.onPrimary,
                     border: true,
                   ),
@@ -46,16 +42,15 @@ class GameAppBar extends StatelessWidget {
       bottom: TabBar(
         controller: controller,
         isScrollable: true,
-        tabs: List.generate(roundLabels.length + 1, (index) {
-          int round = index - 1;
-          if (index == 0)
-            return const _Tab(
-              label: 'Overview',
-            );
-          return _Tab(
-            round: round,
-            label: roundLabels[index - 1],
-          );
+        tabs: List.generate(game.numRounds + 1, (index) {
+          return index == 0
+              ? const _Tab(
+                  label: 'Overview',
+                )
+              : _Tab(
+                  round: index - 1,
+                  label: game.roundLabels[index - 1],
+                );
         }),
       ),
     );
@@ -74,8 +69,8 @@ class _Tab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scoreModel = Provider.of<ScoreModel>(context);
-    final isComplete = round != null ? scoreModel.isComplete(round!) : false;
+    final gameModel = Provider.of<GameModel>(context);
+    final isComplete = round == null ? false : gameModel.isRoundComplete(round!);
     return Tab(
       child: Container(
         constraints: BoxConstraints(

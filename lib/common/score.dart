@@ -1,48 +1,5 @@
+import './game.dart';
 import './round.dart';
-
-enum Scoring {
-  lowest(1, 'Lowest Score'),
-  highest(2, 'Highest Score'),
-  wizard(3, 'Wizard Scoring');
-
-  final int id;
-  final String label;
-
-  const Scoring(this.id, this.label);
-
-  factory Scoring.fromId(int id) {
-    return values.firstWhere((e) => e.id == id);
-  }
-
-  int calculate(int bid, int score) {
-    switch (this) {
-      case Scoring.lowest:
-        return score < 0 ? 0 : score;
-      case Scoring.highest:
-        return score < 0 ? 0 : score;
-      case Scoring.wizard:
-        if (bid < 0 || score < 0) return 0;
-        if (bid == score) return (bid + 2) * 10;
-        return (bid - score).abs() * -10;
-    }
-  }
-
-  /// negative number if left score is winning
-  /// 0 if scores are tied
-  /// positive number if right score is winning
-  int compareScores(int leftScore, int rightScore) {
-    switch (this) {
-      case Scoring.lowest:
-        if (leftScore < rightScore) return -1;
-        if (leftScore == rightScore) return 0;
-        return 1;
-      default:
-        if (leftScore < rightScore) return 1;
-        if (leftScore == rightScore) return 0;
-        return -1;
-    }
-  }
-}
 
 class Score {
   final int numRounds;

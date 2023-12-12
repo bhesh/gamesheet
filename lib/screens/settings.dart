@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/color.dart';
-import 'package:gamesheet/common/settings.dart';
-import 'package:gamesheet/common/themes.dart';
-import 'package:gamesheet/db/app.dart';
-import 'package:gamesheet/db/settings.dart';
+import 'package:gamesheet/models/game_list.dart';
+import 'package:gamesheet/models/settings.dart';
 import 'package:gamesheet/widgets/dialog.dart';
 import 'package:gamesheet/widgets/settings/section.dart';
 import 'package:gamesheet/widgets/settings/field.dart';
@@ -26,7 +24,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Provider.of<ThemeChanger>(context);
+    final settings = Provider.of<SettingsModel>(context);
+    final gameList = Provider.of<GameListModel>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings'),
@@ -39,11 +38,13 @@ class SettingsScreen extends StatelessWidget {
               SettingsField(
                 title: 'Theme',
                 // Named for my wife
-                description: theme.color == Palette.lightPink && theme.isDark
+                description: settings.themeColor == Palette.lightPink &&
+                        settings.themeIsDark
                     ? 'Hana'
-                    : (theme.isDark ? 'Dark ' : 'Light ') + theme.color.label,
-                suffixWidget: ThemeDisplay.small(themeData: theme.data),
-                onTap: () => _themePopup(context, theme),
+                    : (settings.themeIsDark ? 'Dark ' : 'Light ') +
+                        settings.themeColor.label,
+                suffixWidget: ThemeDisplay.small(themeData: settings.themeData),
+                onTap: () => _themePopup(context),
               ),
             ],
           ),
@@ -88,7 +89,7 @@ class SettingsScreen extends StatelessWidget {
                 onTap: () => _confirmDelete(
                   context,
                   'Do you wish to delete all games?',
-                  _deleteAllGames,
+                  gameList.removeAllGames,
                 ),
               ),
               SettingsField(
@@ -97,7 +98,10 @@ class SettingsScreen extends StatelessWidget {
                 onTap: () => _confirmDelete(
                   context,
                   'Do you wish to delete all data?',
-                  _deleteAllData,
+                  () async {
+                    await gameList.removeAllGames();
+                    await settings.resetSettings();
+                  },
                 ),
               ),
             ],
@@ -107,7 +111,8 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _themePopup(BuildContext context, ThemeChanger theme) {
+  void _themePopup(BuildContext context) {
+    final settings = Provider.of<SettingsModel>(context, listen: false);
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -128,8 +133,7 @@ class SettingsScreen extends StatelessWidget {
               return InkWell(
                 borderRadius: BorderRadius.circular(15),
                 onTap: () {
-                  theme.updateTheme(color, isDark);
-                  _saveTheme(color, isDark);
+                  settings.updateTheme(color, isDark);
                   Navigator.of(context).pop();
                 },
                 child: ThemeDisplay.large(
@@ -146,34 +150,17 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Future _saveTheme(Palette color, bool isDark) async {
-    await SettingsDatabase.updateSetting(Setting.themeColor, color.id);
-    await SettingsDatabase.updateSetting(Setting.themeIsDark, isDark ? 1 : 0);
-  }
-
   void _confirmDelete(
     BuildContext context,
     String message,
-    Future Function() action,
+    Future<void> Function() action,
   ) {
     confirmDeleteDialog(context, message).then((confirm) {
       if (confirm) {
         loaderDialog(context, action).then(
-          (_) => Navigator.of(context).pop(true),
+          (_) => Navigator.of(context).pop(),
         );
       }
     });
-  }
-
-  Future _deleteAllGames() async {
-    var database = await AppDatabase.gameDatabase;
-    await AppDatabase.createGameDatabase(database);
-  }
-
-  Future _deleteAllData() async {
-    var settings = await AppDatabase.settingsDatabase;
-    await AppDatabase.createSettingsDatabase(settings);
-    var games = await AppDatabase.gameDatabase;
-    await AppDatabase.createGameDatabase(games);
   }
 }

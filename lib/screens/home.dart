@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gamesheet/model/game_list.dart';
+import 'package:gamesheet/models/game_list.dart';
 import 'package:gamesheet/screens/newgame.dart';
 import 'package:gamesheet/screens/game.dart';
 import 'package:gamesheet/screens/settings.dart';
@@ -9,26 +9,14 @@ import 'package:gamesheet/widgets/home/search_bar.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext _context) {
-    return ChangeNotifierProvider(
-      create: (_) => GameListModel(),
-      child: _HomeScaffold(),
-    );
-  }
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScaffold extends StatefulWidget {
-  const _HomeScaffold({super.key});
-
-  @override
-  State<_HomeScaffold> createState() => _HomeScaffoldState();
-}
-
-class _HomeScaffoldState extends State<_HomeScaffold> {
+class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _searchController;
   late final FocusNode _searchFocus;
   bool _search = false;
@@ -62,7 +50,11 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
       onSelected: (item) {
         switch (item) {
           case HomeMenuItem.settings:
-            _navigate(context, (_) => const SettingsScreen());
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+              ),
+            );
         }
       },
     );
@@ -103,31 +95,23 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
       body: Padding(
         padding: const EdgeInsets.only(top: 8),
         child: GameList(
-          onSelected: (game) => _navigate(context, (_) => GameScreen(game)),
+          onSelected: (game) => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => GameScreen(game),
+            ),
+          ),
           filter: _filter,
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigate(
-          context,
-          (_) => const NewGameScreen(),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const NewGameScreen(),
+          ),
         ),
         tooltip: 'New Game',
         child: const Icon(Symbols.add),
       ),
     );
-  }
-
-  void _navigate(BuildContext context, Widget Function(BuildContext) builder) {
-    final provider = Provider.of<GameListModel>(context, listen: false);
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: builder))
-        .then((changed) {
-      if (changed != null && changed) provider.fetchGames();
-      setState(() {
-        _search = false;
-        _filter = null;
-      });
-    });
   }
 }

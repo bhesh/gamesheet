@@ -4,24 +4,9 @@ import './app.dart';
 
 class SettingsDatabase {
   static Future<SettingsMap> getSettings() async {
-    Palette? themeColor = null;
-    bool? themeIsDark = null;
-
     var database = await AppDatabase.settingsDatabase;
-    List<Map<String, dynamic>> list = await database.query('settings');
-    list.forEach((row) {
-      var setting = Setting.fromId(row['id']);
-      switch (setting) {
-        case Setting.themeColor:
-          themeColor = Palette.fromId(row['value']);
-        case Setting.themeIsDark:
-          themeIsDark = row['value'] != 0;
-      }
-    });
-    return SettingsMap(
-      themeColor: themeColor,
-      themeIsDark: themeIsDark,
-    );
+    List<Map<String, dynamic>> rows = await database.query('settings');
+    return SettingsMap.fromRows(rows);
   }
 
   static Future updateSetting(Setting setting, int value) async {
@@ -37,7 +22,7 @@ class SettingsDatabase {
   static Future updateAllSettings(SettingsMap map) async {
     var database = await AppDatabase.settingsDatabase;
     var batch = database.batch();
-    map.toMap().forEach(
+    map.toRows().forEach(
           (row) => batch.update(
             'settings',
             row,

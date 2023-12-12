@@ -1,11 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/widgets/card.dart';
 
-class GameTypePopup extends StatelessWidget {
+class GameTypeCard extends StatelessWidget {
   final GameType selected;
   final void Function(GameType)? onSelected;
 
-  const GameTypePopup({
+  const GameTypeCard({
+    super.key,
+    required this.selected,
+    this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GamesheetCard(
+      title: 'Select game type',
+      child: _GameTypePopup(
+        selected: selected,
+        onSelected: onSelected,
+      ),
+    );
+  }
+}
+
+class _GameTypePopup extends StatelessWidget {
+  final GameType selected;
+  final void Function(GameType)? onSelected;
+
+  const _GameTypePopup({
+    super.key,
     required this.selected,
     this.onSelected,
   });
@@ -57,7 +81,6 @@ class _GameTypePopupItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return InkWell(
       borderRadius: BorderRadius.circular(29),
       onTap: onSelected,
@@ -68,7 +91,6 @@ class _GameTypePopupItem extends StatelessWidget {
           left: 18,
           right: 10,
         ),
-        width: size.width * 0.8,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
           borderRadius: BorderRadius.circular(29),

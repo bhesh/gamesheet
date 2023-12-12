@@ -24,7 +24,35 @@ class SettingsMap {
   })  : this.themeColor = themeColor ?? Palette.lightBlue,
         this.themeIsDark = themeIsDark ?? false;
 
-  List<Map<String, dynamic>> toMap() {
+  factory SettingsMap.fromRows(List<Map<String, dynamic>> rows) {
+    Palette? themeColor = null;
+    bool? themeIsDark = null;
+    rows.forEach((row) {
+      var setting = Setting.fromId(row['id']);
+      switch (setting) {
+        case Setting.themeColor:
+          themeColor = Palette.fromId(row['value']);
+        case Setting.themeIsDark:
+          themeIsDark = row['value'] != 0;
+      }
+    });
+    return SettingsMap(
+      themeColor: themeColor,
+      themeIsDark: themeIsDark,
+    );
+  }
+
+  SettingsMap copyWith({
+    Palette? themeColor,
+    bool? themeIsDark,
+  }) {
+    return SettingsMap(
+      themeColor: themeColor ?? this.themeColor,
+      themeIsDark: themeIsDark ?? this.themeIsDark,
+    );
+  }
+
+  List<Map<String, dynamic>> toRows() {
     return [
       {
         'id': Setting.themeColor.id,
