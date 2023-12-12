@@ -1,19 +1,12 @@
 import './color.dart';
 
 class Player {
-  final int? id;
+  final int id;
   final int gameId;
   final String name;
   final Palette color;
 
   const Player({
-    this.id,
-    required this.name,
-    required this.color,
-    required this.gameId,
-  });
-
-  const Player.raw({
     required this.id,
     required this.gameId,
     required this.name,
@@ -33,7 +26,7 @@ class Player {
     String? name,
     Palette? color,
   }) {
-    return Player.raw(
+    return Player(
       id: this.id,
       gameId: this.gameId,
       name: name ?? this.name,
@@ -42,12 +35,11 @@ class Player {
   }
 
   Map<String, dynamic> toMap() {
-    var map = {
+    return {
+      'id': id,
+      'gameId': gameId,
       'name': name,
       'color': color.id,
-      'gameId': gameId,
     };
-    if (id != null) map['id'] = id!;
-    return map;
   }
 }

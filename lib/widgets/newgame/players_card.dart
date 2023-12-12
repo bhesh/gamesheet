@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gamesheet/common/color.dart';
 import 'package:gamesheet/controllers/player_controller.dart';
 import 'package:gamesheet/widgets/card.dart';
+import 'package:gamesheet/widgets/dialog.dart';
 import 'package:gamesheet/widgets/rounded_text_field.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -145,7 +146,10 @@ class _PlayerInput extends StatelessWidget {
       onSubmitted: onSubmitted,
       icon: InkWell(
         borderRadius: BorderRadius.circular(30),
-        onTap: () => _colorChooser(context),
+        onTap: () => colorChooserDialog(
+          context,
+          (color) => onColorChange == null ? null : onColorChange!(color),
+        ),
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -162,42 +166,6 @@ class _PlayerInput extends StatelessWidget {
         tooltip: 'Remove Player Field',
         onPressed: onDelete,
       ),
-    );
-  }
-
-  void _colorChooser(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 75,
-              childAspectRatio: 1.0,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-            ),
-            itemCount: Palette.values.length,
-            itemBuilder: (context, colorIndex) {
-              return GestureDetector(
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Palette.values[colorIndex].background,
-                    borderRadius: BorderRadius.circular(37.5),
-                  ),
-                ),
-                onTap: () {
-                  if (onColorChange != null)
-                    onColorChange!(Palette.values[colorIndex]);
-                  Navigator.of(context).pop();
-                },
-              );
-            },
-          ),
-        );
-      },
     );
   }
 }

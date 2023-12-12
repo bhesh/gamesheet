@@ -8,6 +8,7 @@ import 'package:gamesheet/models/game.dart';
 import 'package:gamesheet/models/round.dart';
 import 'package:gamesheet/widgets/avatar.dart';
 import 'package:gamesheet/widgets/card.dart';
+import 'package:gamesheet/widgets/game/update_player.dart';
 import 'package:provider/provider.dart';
 import './player_input.dart';
 
@@ -97,6 +98,7 @@ class _RoundTabState extends State<RoundTab> {
           game: widget.game,
           player: player,
           isDealer: dealerIndex == null ? null : dealerIndex! == index,
+          onTap: () => updatePlayerScreen(context, widget.game, player),
           bidController: _bidControllers?[index],
           onBidUnfocus: () {
             String bidText = _bidControllers![index].text.trim();

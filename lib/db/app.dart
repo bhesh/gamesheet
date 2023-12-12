@@ -98,10 +98,11 @@ class AppDatabase {
     batch.execute(
       '''
       CREATE TABLE players (
-          id INTEGER PRIMARY KEY,
+          id INTEGER NOT NULL,
           gameId INTEGER NOT NULL,
           name TEXT NOT NULL,
-          color INTEGER NOT NULL
+          color INTEGER NOT NULL,
+          UNIQUE(id, gameId)
       )
       ''',
     );

@@ -9,6 +9,7 @@ class PlayerInput extends StatelessWidget {
   final Game game;
   final Player player;
   final bool? isDealer;
+  final void Function()? onTap;
   final TextEditingController? bidController;
   final void Function()? onBidUnfocus;
   final TextEditingController scoreController;
@@ -19,6 +20,7 @@ class PlayerInput extends StatelessWidget {
     required this.game,
     required this.player,
     this.isDealer,
+    this.onTap,
     this.bidController,
     this.onBidUnfocus,
     required this.scoreController,
@@ -29,29 +31,33 @@ class PlayerInput extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     List<Widget> children = [
-      // Player avatar
+      // Player avatar and name
       Align(
         alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: GamesheetAvatar(
-            name: player.name,
-            color: player.color,
-          ),
-        ),
-      ),
-
-      // Player name
-      Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 72),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(15),
+          onTap: onTap,
           child: Container(
-            width: game.hasBids ? size.width - 276 : size.width - 190,
-            child: Text(
-              player.name,
-              style: Theme.of(context).textTheme.titleMedium,
-              overflow: TextOverflow.ellipsis,
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            width: game.hasBids ? size.width - 208 : size.width - 118,
+            child: Row(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: GamesheetAvatar(
+                    name: player.name,
+                    color: player.color,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Text(
+                    player.name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

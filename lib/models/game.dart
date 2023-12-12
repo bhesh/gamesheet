@@ -76,6 +76,7 @@ class GameModel extends ChangeNotifier {
 
   Future<void> _initializePlayers() async {
     var players = await GameDatabase.getPlayers(game.id!);
+    players.sort((a, b) => a.id.compareTo(b.id));
     assert(players.isNotEmpty);
     _players = players;
   }

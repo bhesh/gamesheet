@@ -20,13 +20,18 @@ class GameDatabase {
     final database = await AppDatabase.gameDatabase;
     final gameId = await database.insert('games', game.toMap());
     final batch = database.batch();
-    players.forEach((player) {
-      var (name, color) = player;
+    for (int i = 0; i < players.length; ++i) {
+      var (name, color) = players[i];
       batch.insert(
         'players',
-        Player(name: name, color: color, gameId: gameId).toMap(),
+        Player(
+          id: i,
+          name: name,
+          color: color,
+          gameId: gameId,
+        ).toMap(),
       );
-    });
+    }
     batch.commit(noResult: true);
     return gameId;
   }
@@ -58,7 +63,7 @@ class GameDatabase {
     var database = await AppDatabase.gameDatabase;
     await database.update(
       'players',
-      {'name': player.name, 'color': player.color},
+      {'name': player.name, 'color': player.color.id},
       where: 'id = ?',
       whereArgs: [player.id!],
     );

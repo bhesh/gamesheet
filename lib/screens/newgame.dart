@@ -21,10 +21,6 @@ class NewGameScreen extends StatefulWidget {
 }
 
 class _NewGameScreenState extends State<NewGameScreen> {
-  static final int maxNumPlayers = 16;
-  static final int maxNameLength = 40;
-  static final int maxNumRounds = 25;
-
   late final TextEditingController _nameController;
   late final List<PlayerController> _playerControllers;
   late final TextEditingController _roundController;
@@ -89,8 +85,8 @@ class _NewGameScreenState extends State<NewGameScreen> {
       ),
       PlayersCard(
         controllers: _playerControllers,
-        maxNumPlayers: maxNumPlayers,
-        maxNameLength: maxNameLength,
+        maxNumPlayers: Game.maxNumPlayers,
+        maxNameLength: Game.maxNameLength,
         errorText: _playerError,
         onAdd: () => setState(() {
           _playerError = null;
@@ -137,7 +133,7 @@ class _NewGameScreenState extends State<NewGameScreen> {
 
     // Submit button
     children.add(SubmitCard(
-      onTap: () => _createGame(context),
+      onPressed: () => _createGame(context),
     ));
 
     // Create Scaffold
@@ -208,7 +204,7 @@ class _NewGameScreenState extends State<NewGameScreen> {
   List<(String, Palette)> _getPlayerList() {
     return _playerControllers
         .where((player) => player.name != null)
-        .take(maxNumPlayers)
+        .take(Game.maxNumPlayers)
         .map((player) => (player.name!, player.color))
         .toList();
   }
@@ -242,7 +238,7 @@ class _NewGameScreenState extends State<NewGameScreen> {
       if (_numRounds < 1) {
         _roundError = 'Too few rounds';
         hasError = true;
-      } else if (_numRounds > maxNumRounds) {
+      } else if (_numRounds > Game.maxNumRounds) {
         _roundError = 'Too many rounds';
         hasError = true;
       } else {

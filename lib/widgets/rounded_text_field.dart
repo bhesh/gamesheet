@@ -26,11 +26,10 @@ class RoundedTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     TextStyle? hintStyle = Theme.of(context).inputDecorationTheme.hintStyle;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      width: size.width * 0.8,
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
         borderRadius: BorderRadius.circular(29),

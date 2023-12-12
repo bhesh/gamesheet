@@ -93,6 +93,10 @@ enum Scoring {
 }
 
 class Game {
+  static final int maxNumPlayers = 16;
+  static final int maxNameLength = 40;
+  static final int maxNumRounds = 25;
+
   final int? id;
   final String name;
   final GameType type;

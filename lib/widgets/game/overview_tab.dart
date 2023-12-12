@@ -27,7 +27,7 @@ class OverviewTab extends StatelessWidget {
               )
             : FutureProvider<GameSummary?>.value(
                 initialData: null,
-                value: calculateSummary(game, gameModel.scores!),
+                value: calculateGameSummary(game, gameModel.scores!),
                 child: Summary(
                   game: game,
                   players: gameModel.players!,

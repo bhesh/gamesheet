@@ -1,4 +1,5 @@
 import 'package:gamesheet/common/game.dart';
+import 'package:gamesheet/common/player.dart';
 import 'package:gamesheet/common/score.dart';
 
 class ScoreRange {
@@ -18,7 +19,10 @@ class GameSummary {
   });
 }
 
-Future<GameSummary> calculateSummary(Game game, Map<int, Score> scores) async {
+Future<GameSummary> calculateGameSummary(
+  Game game,
+  Map<int, Score> scores,
+) async {
   assert(scores.length > 0);
   int initialScore = scores.values.first.totalScore;
   ScoreRange totalScoreRange = ScoreRange(initialScore, initialScore);
@@ -42,4 +46,21 @@ Future<GameSummary> calculateSummary(Game game, Map<int, Score> scores) async {
     totalScoreRange: totalScoreRange,
     averageScoreRange: averageScoreRange,
   );
+}
+
+Future<ScoreRange> calculatePlayerSummary(
+  Game game,
+  Score? score,
+) async {
+  if (score != null) {
+    int initialScore = score!.getScore(0);
+    ScoreRange scoreRange = ScoreRange(initialScore, initialScore);
+    for (int i = 0; i < game.numRounds; ++i) {
+      final s = score!.getScore(i);
+      if (s < scoreRange.minValue) scoreRange.minValue = s;
+      if (s > scoreRange.maxValue) scoreRange.maxValue = s;
+    }
+    return scoreRange;
+  }
+  return ScoreRange(0, 0);
 }
