@@ -59,7 +59,13 @@ class _NewGameScreenState extends State<NewGameScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController();
-    _playerControllers = [PlayerController.random()];
+    _playerControllers = [
+      PlayerController.random(
+        onUnfocus: () => setState(() {
+          _players = _getPlayerList();
+        }),
+      ),
+    ];
     _roundController = TextEditingController();
   }
 
@@ -88,7 +94,11 @@ class _NewGameScreenState extends State<NewGameScreen> {
         errorText: _playerError,
         onAdd: () => setState(() {
           _playerError = null;
-          _playerControllers.add(PlayerController.random());
+          _playerControllers.add(PlayerController.random(
+            onUnfocus: () => setState(() {
+              _players = _getPlayerList();
+            }),
+          ));
         }),
         onColorChange: (index, color) => setState(() {
           _playerControllers[index].color = color;
@@ -97,9 +107,6 @@ class _NewGameScreenState extends State<NewGameScreen> {
         onDelete: (index) => setState(() {
           _playerControllers.removeAt(index).dispose();
           _selectedDealer = 0;
-          _players = _getPlayerList();
-        }),
-        onUnfocus: (index) => setState(() {
           _players = _getPlayerList();
         }),
       ),

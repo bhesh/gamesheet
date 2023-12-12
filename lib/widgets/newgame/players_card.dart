@@ -13,7 +13,6 @@ class PlayersCard extends StatelessWidget {
   final void Function()? onAdd;
   final void Function(int, Palette)? onColorChange;
   final void Function(int)? onDelete;
-  final void Function(int)? onUnfocus;
 
   const PlayersCard({
     super.key,
@@ -24,7 +23,6 @@ class PlayersCard extends StatelessWidget {
     this.onAdd,
     this.onColorChange,
     this.onDelete,
-    this.onUnfocus,
   });
 
   @override
@@ -40,7 +38,6 @@ class PlayersCard extends StatelessWidget {
         onAdd: onAdd,
         onColorChange: onColorChange,
         onDelete: onDelete,
-        onUnfocus: onUnfocus,
       ),
     );
   }
@@ -55,7 +52,6 @@ class _PlayerTextFields extends StatelessWidget {
   final void Function()? onAdd;
   final void Function(int, Palette)? onColorChange;
   final void Function(int)? onDelete;
-  final void Function(int)? onUnfocus;
 
   const _PlayerTextFields({
     super.key,
@@ -67,7 +63,6 @@ class _PlayerTextFields extends StatelessWidget {
     this.onAdd,
     this.onColorChange,
     this.onDelete,
-    this.onUnfocus,
   });
 
   @override
@@ -89,7 +84,6 @@ class _PlayerTextFields extends StatelessWidget {
             if (nextIndex < controllers.length)
               controllers[nextIndex].focusNode.requestFocus();
           },
-          onUnfocus: () => onUnfocus == null ? {} : onUnfocus!(i),
         ),
       ));
     }
@@ -129,7 +123,6 @@ class _PlayerInput extends StatelessWidget {
   final void Function(Palette)? onColorChange;
   final void Function()? onDelete;
   final ValueChanged<String>? onSubmitted;
-  final void Function()? onUnfocus;
 
   const _PlayerInput({
     required this.controller,
@@ -139,7 +132,6 @@ class _PlayerInput extends StatelessWidget {
     this.onColorChange,
     this.onDelete,
     this.onSubmitted,
-    this.onUnfocus,
   });
 
   @override
@@ -151,7 +143,6 @@ class _PlayerInput extends StatelessWidget {
       hintText: hintText,
       errorText: errorText,
       onSubmitted: onSubmitted,
-      onUnfocus: onUnfocus,
       icon: InkWell(
         borderRadius: BorderRadius.circular(30),
         onTap: () => _colorChooser(context),
