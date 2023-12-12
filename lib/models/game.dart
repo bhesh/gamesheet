@@ -12,7 +12,7 @@ class GameModel extends ChangeNotifier {
   final List<bool> _isComplete;
   List<Player>? _players;
   HashMap<int, Score>? _scores;
-  List<Player>? _winners;
+  List<int>? _winners;
 
   GameModel(this.game)
       : assert(game.id != null),
@@ -28,7 +28,7 @@ class GameModel extends ChangeNotifier {
   UnmodifiableMapView<int, Score>? get scores =>
       _scores == null ? null : UnmodifiableMapView(_scores!);
 
-  UnmodifiableListView<Player>? get winners =>
+  UnmodifiableListView<int>? get winners =>
       _winners == null ? null : UnmodifiableListView(_winners!);
 
   Player? updatePlayer({
@@ -110,9 +110,11 @@ class GameModel extends ChangeNotifier {
       scores!.values.forEach((score) {
         if (score.compareScoreTo(winningScore) < 0) winningScore = score;
       });
-      var winners = players!.where((player) {
-        return scores![player.id!]!.compareScoreTo(winningScore) == 0;
-      }).toList();
+      List<int> winners = List.empty(growable: true);
+      for (int i = 0; i < game.numPlayers; ++i) {
+        if (scores![players![i].id!]!.compareScoreTo(winningScore) == 0)
+          winners.add(i);
+      }
       _winners = winners.length < game.numPlayers ? winners : [];
       notifyListeners();
     }

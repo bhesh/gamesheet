@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gamesheet/common/player.dart';
 import 'package:gamesheet/widgets/avatar.dart';
+import 'package:gamesheet/models/game.dart';
+import 'package:provider/provider.dart';
 
 class WinnerList extends StatelessWidget {
-  final List<Player>? winners;
+  final List<int>? winners;
   final Color? textColor;
   final bool border;
 
@@ -16,8 +18,9 @@ class WinnerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gameProvider = Provider.of<GameModel>(context);
     List<Widget> children = [Spacer()];
-    if (winners == null || winners!.isEmpty)
+    if (gameProvider.players == null || winners == null || winners!.isEmpty)
       children.add(
         Text('No winners',
             style: Theme.of(context)
@@ -26,7 +29,9 @@ class WinnerList extends StatelessWidget {
                 ?.copyWith(color: textColor)),
       );
     else {
-      winners!.take(5).forEach((player) {
+      winners!.take(5).forEach((index) {
+        assert(index < gameProvider.players!.length);
+        Player player = gameProvider.players![index];
         var avatar = GamesheetAvatar(
           name: player.name,
           color: player.color,
