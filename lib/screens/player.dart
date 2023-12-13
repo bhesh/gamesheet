@@ -56,8 +56,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    assert(widget.player.id != null);
-    Score? score = widget.scores[widget.player.id!];
+    Score? score = widget.scores[widget.player.id];
     return Scaffold(
       appBar: AppBar(
         title: Text(_name),

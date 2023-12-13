@@ -16,9 +16,8 @@ void updatePlayerScreen(BuildContext context, Game game, Player player) {
           scores: gameModel.scores!,
           onSave: (name, color) {
             if (player.name != null || player.color != color) {
-              assert(player.id != null);
               gameModel.updatePlayer(
-                playerId: player.id!,
+                playerId: player.id,
                 name: name,
                 color: color,
               );

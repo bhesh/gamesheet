@@ -58,8 +58,7 @@ class _RoundTabState extends State<RoundTab> {
       // Initialize the text fields
       for (int i = 0; i < gameModel.players!.length; ++i) {
         Player player = gameModel.players![i];
-        assert(player.id != null);
-        Round? round = roundModel.round![player.id!];
+        Round? round = roundModel.round![player.id];
         int? bid = round?.bid;
         int? score = round?.score;
         if (_bidControllers != null && bid != null)
@@ -104,8 +103,7 @@ class _RoundTabState extends State<RoundTab> {
             String bidText = _bidControllers![index].text.trim();
             int? bid = bidText.isEmpty ? null : int.parse(bidText);
             Player player = gameModel.players![index];
-            assert(player.id != null);
-            Round? newRound = roundModel.updateBid(player.id!, bid);
+            Round? newRound = roundModel.updateBid(player.id, bid);
             if (newRound != null) {
               gameModel.updateScore(newRound!);
               _checkIfComplete();
@@ -116,8 +114,7 @@ class _RoundTabState extends State<RoundTab> {
             String scoreText = _scoreControllers[index].text.trim();
             int? score = scoreText.isEmpty ? null : int.parse(scoreText);
             Player player = gameModel.players![index];
-            assert(player.id != null);
-            Round? newRound = roundModel.updateScore(player.id!, score);
+            Round? newRound = roundModel.updateScore(player.id, score);
             if (newRound != null) {
               gameModel.updateScore(newRound!);
               _checkIfComplete();

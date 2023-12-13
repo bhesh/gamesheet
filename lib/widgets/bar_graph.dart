@@ -75,8 +75,7 @@ class BarGraph extends StatelessWidget {
       assert(scores != null);
       for (int i = 0; i < players!.length; ++i) {
         Player player = players![i];
-        assert(player.id != null);
-        Score? score = maxValue == null ? null : scores![player.id!];
+        Score? score = maxValue == null ? null : scores![player.id];
         switch (type) {
           case BarGraphType.total:
             children.add(_ScoreBar(

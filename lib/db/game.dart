@@ -26,9 +26,9 @@ class GameDatabase {
         'players',
         Player(
           id: i,
+          gameId: gameId,
           name: name,
           color: color,
-          gameId: gameId,
         ).toMap(),
       );
     }
@@ -59,13 +59,12 @@ class GameDatabase {
   }
 
   static Future updatePlayer(final Player player) async {
-    assert(player.id != null);
     var database = await AppDatabase.gameDatabase;
     await database.update(
       'players',
       {'name': player.name, 'color': player.color.id},
-      where: 'id = ?',
-      whereArgs: [player.id!],
+      where: 'id = ? AND gameId = ?',
+      whereArgs: [player.id, player.gameId],
     );
   }
 

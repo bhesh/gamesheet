@@ -85,8 +85,7 @@ class GameModel extends ChangeNotifier {
     assert(_players != null);
     _scores = HashMap();
     _players!.forEach((player) {
-      assert(player.id != null);
-      _scores![player.id!] = Score(game.numRounds, game.scoring);
+      _scores![player.id] = Score(game.numRounds, game.scoring);
     });
     var rounds = await GameDatabase.getRounds(game.id!);
     List<int> numComplete = List.filled(game.numRounds, 0);
