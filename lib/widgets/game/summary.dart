@@ -43,13 +43,24 @@ class Summary extends StatelessWidget {
           ),
         ),
         GamesheetCard(
-          title: 'Average Scores',
-          child: BarGraph.average(
+          title: 'Highest Scores',
+          child: BarGraph.highest(
             game: game,
             players: players,
             scores: scores,
-            minValue: summary?.averageScoreRange.minValue,
-            maxValue: summary?.averageScoreRange.maxValue,
+            minValue: summary?.highestScoreRange.minValue,
+            maxValue: summary?.highestScoreRange.maxValue,
+            onTap: (player) => updatePlayerScreen(context, game, player),
+          ),
+        ),
+        GamesheetCard(
+          title: 'Lowest Scores',
+          child: BarGraph.lowest(
+            game: game,
+            players: players,
+            scores: scores,
+            minValue: summary?.lowestScoreRange.minValue,
+            maxValue: summary?.lowestScoreRange.maxValue,
             onTap: (player) => updatePlayerScreen(context, game, player),
           ),
         ),

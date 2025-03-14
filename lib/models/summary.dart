@@ -11,11 +11,13 @@ class ScoreRange {
 
 class GameSummary {
   final ScoreRange totalScoreRange;
-  final ScoreRange averageScoreRange;
+  final ScoreRange highestScoreRange;
+  final ScoreRange lowestScoreRange;
 
   const GameSummary({
     required this.totalScoreRange,
-    required this.averageScoreRange,
+    required this.highestScoreRange,
+    required this.lowestScoreRange,
   });
 }
 
@@ -26,25 +28,29 @@ Future<GameSummary> calculateGameSummary(
   assert(scores.length > 0);
   int initialScore = scores.values.first.totalScore;
   ScoreRange totalScoreRange = ScoreRange(initialScore, initialScore);
-  ScoreRange averageScoreRange = ScoreRange(
-    initialScore / game.numRounds,
-    initialScore / game.numRounds,
-  );
+  ScoreRange highestScoreRange = ScoreRange(initialScore, initialScore);
+  ScoreRange lowestScoreRange = ScoreRange(initialScore, initialScore);
   scores.values.forEach((score) {
     final totalScore = score.totalScore;
     if (totalScore < totalScoreRange.minValue)
       totalScoreRange.minValue = totalScore;
     if (totalScore > totalScoreRange.maxValue)
       totalScoreRange.maxValue = totalScore;
-    final averageScore = totalScore / game.numRounds;
-    if (averageScore < averageScoreRange.minValue)
-      averageScoreRange.minValue = averageScore;
-    if (averageScore > averageScoreRange.maxValue)
-      averageScoreRange.maxValue = averageScore;
+    final highestScore = score.highestScore;
+    if (highestScore < highestScoreRange.minValue)
+      highestScoreRange.minValue = highestScore;
+    if (highestScore > highestScoreRange.maxValue)
+      highestScoreRange.maxValue = highestScore;
+    final lowestScore = score.lowestScore;
+    if (lowestScore < lowestScoreRange.minValue)
+      lowestScoreRange.minValue = lowestScore;
+    if (lowestScore > lowestScoreRange.maxValue)
+      lowestScoreRange.maxValue = lowestScore;
   });
   return GameSummary(
     totalScoreRange: totalScoreRange,
-    averageScoreRange: averageScoreRange,
+    highestScoreRange: highestScoreRange,
+    lowestScoreRange: lowestScoreRange,
   );
 }
 

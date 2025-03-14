@@ -202,3 +202,21 @@ class Game {
 
   String get scoreText => hasBids ? 'tricks' : 'score';
 }
+
+enum Sorting {
+  newest(1, Symbols.arrow_upward),
+  oldest(2, Symbols.arrow_downward),
+  abc(3, Symbols.text_rotation_down),
+  zyx(4, Symbols.text_rotate_up);
+
+  final int id;
+  final IconData icon;
+
+  const Sorting(this.id, this.icon);
+
+  factory Sorting.fromId(int id) {
+    return values.firstWhere((e) => e.id == id);
+  }
+
+  Sorting get getNext => Sorting.fromId((id % values.length) + 1);
+}

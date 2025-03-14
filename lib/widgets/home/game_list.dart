@@ -9,11 +9,13 @@ import './game_list_card.dart';
 
 class GameList extends StatelessWidget {
   final void Function(Game)? onSelected;
+  final Sorting? sorting;
   final String? filter;
 
   const GameList({
     super.key,
     this.onSelected,
+    this.sorting,
     this.filter,
   });
 
@@ -26,17 +28,32 @@ class GameList extends StatelessWidget {
             size: 50,
           )
         : gameList.games!.isNotEmpty
-            ? _buildListView(context, _filtered(gameList.games!))
+            ? _buildListView(context, _sorted(_filtered(gameList.games!)))
             : GamesheetMessage('No games');
   }
 
   List<Game> _filtered(List<Game> gameList) {
-    if (filter == null) return gameList;
     return gameList.where(
       (game) {
-        return game.name.toLowerCase().contains(filter!.toLowerCase());
+        return filter == null ||
+            game.name.toLowerCase().contains(filter!.toLowerCase());
       },
     ).toList();
+  }
+
+  List<Game> _sorted(List<Game> gameList) {
+    if (sorting == null) return gameList;
+    switch (sorting!) {
+      case Sorting.newest:
+        gameList.sort((a, b) => b.created.compareTo(a.created));
+      case Sorting.oldest:
+        gameList.sort((a, b) => a.created.compareTo(b.created));
+      case Sorting.abc:
+        gameList.sort((a, b) => a.name.compareTo(b.name));
+      case Sorting.zyx:
+        gameList.sort((a, b) => b.name.compareTo(a.name));
+    }
+    return gameList;
   }
 
   Widget _buildListView(BuildContext context, List<Game> games) {

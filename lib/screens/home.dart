@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gamesheet/common/game.dart';
 import 'package:gamesheet/models/game_list.dart';
 import 'package:gamesheet/screens/newgame.dart';
 import 'package:gamesheet/screens/game.dart';
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _searchController;
   late final FocusNode _searchFocus;
   bool _search = false;
+  Sorting _sorting = Sorting.newest;
   String? _filter;
 
   @override
@@ -46,6 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var sort = IconButton(
+      icon: Icon(_sorting.icon),
+      onPressed: () => setState(() {
+        _sorting = _sorting.getNext;
+      }),
+    );
     var options = HomeMenuList(
       onSelected: (item) {
         switch (item) {
@@ -79,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : const Text('Gamesheet'),
         actions: _search
-            ? <Widget>[options]
+            ? <Widget>[sort, options]
             : <Widget>[
                 IconButton(
                   icon: Icon(_search ? Symbols.close : Symbols.search),
@@ -89,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _searchFocus.requestFocus();
                   }),
                 ),
+                sort,
                 options
               ],
       ),
@@ -100,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (_) => GameScreen(game),
             ),
           ),
+          sorting: _sorting,
           filter: _filter,
         ),
       ),

@@ -1,3 +1,4 @@
+import 'dart:math';
 import './game.dart';
 import './round.dart';
 
@@ -19,6 +20,10 @@ class Score {
   }
 
   int get totalScore => scores.fold(0, (a, b) => a + b);
+
+  int get highestScore => scores.fold(-2147000000, (a, b) => max(a, b));
+
+  int get lowestScore => scores.fold(2147000000, (a, b) => min(a, b));
 
   /// negative number if this player is winning
   /// 0 if players are tied

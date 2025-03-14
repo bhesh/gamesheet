@@ -7,7 +7,8 @@ import 'package:gamesheet/common/score.dart';
 
 enum BarGraphType {
   total,
-  average,
+  highest,
+  lowest,
   player;
 }
 
@@ -41,7 +42,7 @@ class BarGraph extends StatelessWidget {
         this.score = null,
         this.initialColor = null;
 
-  const BarGraph.average({
+  const BarGraph.highest({
     super.key,
     required this.game,
     this.minValue,
@@ -49,7 +50,21 @@ class BarGraph extends StatelessWidget {
     required List<Player> players,
     required Map<int, Score> scores,
     this.onTap,
-  })  : this.type = BarGraphType.average,
+  })  : this.type = BarGraphType.highest,
+        this.players = players,
+        this.scores = scores,
+        this.score = null,
+        this.initialColor = null;
+
+  const BarGraph.lowest({
+    super.key,
+    required this.game,
+    this.minValue,
+    this.maxValue,
+    required List<Player> players,
+    required Map<int, Score> scores,
+    this.onTap,
+  })  : this.type = BarGraphType.lowest,
         this.players = players,
         this.scores = scores,
         this.score = null,
@@ -70,7 +85,7 @@ class BarGraph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> children = List.empty(growable: true);
-    if (type == BarGraphType.total || type == BarGraphType.average) {
+    if (type == BarGraphType.total || type == BarGraphType.highest || type == BarGraphType.lowest) {
       assert(players != null);
       assert(scores != null);
       for (int i = 0; i < players!.length; ++i) {
@@ -86,11 +101,20 @@ class BarGraph extends StatelessWidget {
               maxValue: maxValue ?? 0,
               onTap: () => onTap == null ? null : onTap!(player),
             ));
-          case BarGraphType.average:
+          case BarGraphType.highest:
             children.add(_ScoreBar(
               name: player.name,
               color: player.color,
-              value: score == null ? 0 : score!.totalScore / game.numRounds,
+              value: score?.highestScore ?? 0,
+              minValue: minValue ?? 0,
+              maxValue: maxValue ?? 0,
+              onTap: () => onTap == null ? null : onTap!(player),
+            ));
+          case BarGraphType.lowest:
+            children.add(_ScoreBar(
+              name: player.name,
+              color: player.color,
+              value: score?.lowestScore ?? 0,
               minValue: minValue ?? 0,
               maxValue: maxValue ?? 0,
               onTap: () => onTap == null ? null : onTap!(player),

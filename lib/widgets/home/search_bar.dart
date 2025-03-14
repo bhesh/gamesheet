@@ -27,38 +27,42 @@ class GameListSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Container(
-      padding: padding,
-      width: size.width,
-      decoration: BoxDecoration(
-        color: background ??
-            Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(29),
-      ),
-      child: TextField(
-        focusNode: focusNode,
-        controller: controller,
-        onChanged: onChanged,
-        cursorColor: cursorColor,
-        maxLength: maxLength,
-        style: Theme.of(context)
-            .textTheme
-            .bodyLarge
-            ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
-        decoration: InputDecoration(
-          suffixIcon: IconButton(
-            icon: Icon(
-              Symbols.close,
-              color: Theme.of(context).colorScheme.onPrimary,
+    return SafeArea(
+      minimum: const EdgeInsets.only(top: 5, bottom: 5),
+      child: Container(
+        padding: padding,
+        height: AppBar().preferredSize.height - 10,
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+          color: background ??
+              Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(29),
+        ),
+        child: TextField(
+          focusNode: focusNode,
+          controller: controller,
+          onChanged: onChanged,
+          cursorColor: cursorColor,
+          maxLength: maxLength,
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge
+              ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+          decoration: InputDecoration(
+            suffixIcon: IconButton(
+              icon: Icon(
+                Symbols.close,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              onPressed: onCleared ?? () => {},
             ),
-            onPressed: onCleared ?? () => {},
+            hintText: hintText,
+            border: InputBorder.none,
+            counterText: '',
+            hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color:
+                    Theme.of(context).colorScheme.onPrimary.withOpacity(0.75)),
           ),
-          hintText: hintText,
-          border: InputBorder.none,
-          counterText: '',
-          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.75)),
         ),
       ),
     );
