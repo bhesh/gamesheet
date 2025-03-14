@@ -26,10 +26,12 @@ Future<GameSummary> calculateGameSummary(
   Map<int, Score> scores,
 ) async {
   assert(scores.length > 0);
-  int initialScore = scores.values.first.totalScore;
-  ScoreRange totalScoreRange = ScoreRange(initialScore, initialScore);
-  ScoreRange highestScoreRange = ScoreRange(initialScore, initialScore);
-  ScoreRange lowestScoreRange = ScoreRange(initialScore, initialScore);
+  int initialTotalScore = scores.values.first.totalScore;
+  int initialHighestScore = scores.values.first.highestScore;
+  int initialLowestScore = scores.values.first.lowestScore;
+  ScoreRange totalScoreRange = ScoreRange(initialTotalScore, initialTotalScore);
+  ScoreRange highestScoreRange = ScoreRange(initialHighestScore, initialHighestScore);
+  ScoreRange lowestScoreRange = ScoreRange(initialLowestScore, initialLowestScore);
   scores.values.forEach((score) {
     final totalScore = score.totalScore;
     if (totalScore < totalScoreRange.minValue)

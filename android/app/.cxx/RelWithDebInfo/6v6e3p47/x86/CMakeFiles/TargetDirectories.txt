@@ -1,0 +1,2 @@
+C:/Users/Brian/Workspace/gamesheet/android/app/.cxx/RelWithDebInfo/6v6e3p47/x86/CMakeFiles/edit_cache.dir
+C:/Users/Brian/Workspace/gamesheet/android/app/.cxx/RelWithDebInfo/6v6e3p47/x86/CMakeFiles/rebuild_cache.dir
