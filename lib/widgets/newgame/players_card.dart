@@ -144,6 +144,7 @@ class _PlayerInput extends StatelessWidget {
       hintText: hintText,
       errorText: errorText,
       onSubmitted: onSubmitted,
+      contentPadding: EdgeInsets.only(top: 12),
       icon: InkWell(
         borderRadius: BorderRadius.circular(30),
         onTap: () => colorChooserDialog(

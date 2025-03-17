@@ -33,6 +33,7 @@ class GameAppBar extends StatelessWidget {
                       for (int i = 0; i < game.numRounds; ++i) {
                         if (!gameModel.isRoundComplete(i)) {
                           controller.animateTo(i + 1);
+                          return;
                         }
                       }
                     }

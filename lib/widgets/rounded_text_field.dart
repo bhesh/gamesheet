@@ -10,6 +10,7 @@ class RoundedTextField extends StatelessWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final int maxLength;
+  final EdgeInsetsGeometry? contentPadding;
 
   const RoundedTextField({
     super.key,
@@ -22,6 +23,7 @@ class RoundedTextField extends StatelessWidget {
     this.controller,
     this.focusNode,
     this.maxLength = 40,
+    this.contentPadding,
   });
 
   @override
@@ -49,6 +51,7 @@ class RoundedTextField extends StatelessWidget {
             child: icon,
           ),
           suffixIcon: suffixIcon,
+          contentPadding: contentPadding,
           hintText: errorText ?? hintText,
           counterText: "",
           border: InputBorder.none,
